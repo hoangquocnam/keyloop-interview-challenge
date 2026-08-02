@@ -17,7 +17,7 @@ Interview challenge monorepo for a lightweight sales lead management tool.
 
 ## Stack
 
-- Frontend: React, Vite, TypeScript, React Router, TanStack Query
+- Frontend: React, Vite, TypeScript, Ant Design, React Router, MobX, TanStack Query
 - Backend: NestJS, Prisma, PostgreSQL
 - Package management: npm workspaces
 

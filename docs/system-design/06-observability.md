@@ -4,11 +4,47 @@
 
 Observability in this project should be lightweight but intentional.
 
-The challenge does not require production-grade telemetry, but the system should still make failures and key behaviors visible.
+The challenge does not require a full production telemetry platform, but the system should still make failures, latency, and request behavior visible.
+
+For this MVP, the observability strategy is designed to answer four practical questions:
+
+- what request failed
+- where it failed
+- how long it took
+- how to trace it across the main system path
+
+## MVP observability scope
+
+The MVP should include:
+
+- request correlation through a request ID
+- structured backend logs
+- request and response timing
+- enough trace context to follow a request from `web -> api -> db`
+- a health endpoint for basic service visibility
+
+This provides useful debugging value without requiring a full external tracing stack.
 
 ## Logging strategy
 
-### Application logs
+### Backend logger
+
+The backend should use a structured logger rather than relying only on ad hoc console output.
+
+The logger should capture consistent fields such as:
+
+- timestamp
+- log level
+- request ID
+- route
+- method
+- response status
+- duration
+- error message when relevant
+
+This makes logs easier to search, group, and correlate during local debugging or future hosted deployment.
+
+### Application events
 
 The API should log:
 
@@ -20,34 +56,93 @@ The API should log:
 
 ### HTTP request visibility
 
-The API should capture enough request context to help diagnose issues, such as:
+Each HTTP request should be logged with enough context to diagnose failures and latency.
+
+The backend should capture:
 
 - method
 - route
 - response status
 - request duration
-- request identifier if added later
+- request ID
+
+Recommended request lifecycle logging:
+
+- request received
+- request completed successfully
+- request failed with error details
+
+## Request ID strategy
+
+Each request should carry a correlation identifier.
+
+### Approach
+
+- the web application should send a request ID header when possible
+- if the client does not send one, the API should generate one
+- the API should attach the final request ID to:
+  - request-scoped logs
+  - response headers
+  - downstream Prisma-related log entries
+
+### Why this matters
+
+This allows a single user action to be traced across:
+
+- browser request initiation
+- backend request handling
+- database read or write activity
+
+Even without a full distributed tracing platform, this gives the MVP a practical tracing story.
 
 ## Metrics strategy
 
-For this challenge, formal metrics backends are optional.
+For this challenge, a formal metrics backend is optional, but the system should still be designed with measurable signals in mind.
 
-If expanded, useful metrics would include:
+Useful metrics for this system include:
 
 - login success and failure counts
 - request latency by endpoint
 - lead activity creation count
 - error rate by route
 
+For the MVP, the most practical metric-like signals can be derived from structured logs if a dedicated metrics collector is not introduced yet.
+
 ## Tracing strategy
 
-Distributed tracing is not necessary for the first version because the architecture is a single API service plus a database.
+Full distributed tracing is not required for the first version, but request-path tracing should still exist in a lightweight form.
 
-If the project expanded, tracing could follow:
+### MVP tracing model
+
+Tracing should rely on correlation rather than on a full tracing backend.
+
+The key path to trace is:
+
+`Web request -> API controller -> service logic -> Prisma operation -> PostgreSQL`
+
+### What should be traceable
+
+For each important request, the system should make it possible to identify:
 
 - request entry into the API
-- service-layer execution
-- Prisma database operations
+- the API route that handled it
+- the service or domain operation performed
+- the Prisma read or write operation involved
+- whether the request succeeded or failed
+- how long the request took end to end
+
+### Database-level tracing approach
+
+For the MVP, database tracing can be approximated through Prisma-layer logging rather than full SQL tracing infrastructure.
+
+Useful signals include:
+
+- model being queried or updated
+- operation type such as read, insert, or update
+- query duration
+- request ID correlation with the parent API request
+
+Raw SQL logging does not need to be enabled broadly unless debugging requires it.
 
 ## Health visibility
 
@@ -56,16 +151,34 @@ The existing health endpoint provides a basic operational signal that:
 - the service is booting
 - the HTTP layer is reachable
 
-This is enough for early-stage local development and challenge review.
+For the MVP, this endpoint is enough for early-stage local development and challenge review.
+
+If expanded later, health visibility could also include database connectivity checks.
 
 ## Practical observability approach for MVP
 
 | Concern | MVP approach |
 | --- | --- |
 | Startup status | Nest startup logs |
-| Error visibility | explicit API error logging |
+| Request correlation | request ID passed from web or generated by API |
+| Backend logging | structured logger with route, status, duration, and request ID |
+| Error visibility | explicit API error logging with request ID context |
 | API inspection | Swagger and health endpoint |
-| Request debugging | structured request logs if added during implementation |
+| Request debugging | start and completion logs for every important API request |
+| Request-path tracing | correlate web request, API handling, and Prisma operations by request ID |
+| Timing visibility | log request duration and key persistence operation timing |
+
+## Suggested implementation direction
+
+This strategy can be implemented in a lightweight way through:
+
+- a NestJS middleware or interceptor that creates or propagates a request ID
+- a centralized backend logger
+- request and response timing around the HTTP lifecycle
+- Prisma query or operation logging correlated with the active request ID
+- frontend request helpers that attach the request ID to outbound API calls
+
+This keeps the implementation proportional to the project while still making the system meaningfully traceable.
 
 ## Design principle
 
@@ -73,3 +186,4 @@ The observability strategy should stay proportional to the size of the system:
 
 - simple enough for an interview project
 - clear enough to show engineering maturity
+- practical enough to support real debugging of the MVP

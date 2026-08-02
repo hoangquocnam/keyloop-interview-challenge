@@ -139,7 +139,7 @@ The app should solve three practical problems:
 
 | Layer | Stack |
 | --- | --- |
-| Frontend | React, Vite, TypeScript, React Router, TanStack Query |
+| Frontend | React, Vite, TypeScript, Ant Design, React Router, MobX, TanStack Query |
 | Backend | NestJS, Prisma, PostgreSQL |
 | Repo structure | npm workspaces monorepo with `apps/web` and `apps/api` |
 
