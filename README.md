@@ -2,7 +2,18 @@
 
 Interview challenge monorepo for a lightweight sales lead management tool.
 
-See [PROJECT_BRIEF.md](./PROJECT_BRIEF.md) for the agreed product scope, MVP boundaries, and technical direction.
+## Documentation
+
+- [Project Brief](./PROJECT_BRIEF.md)
+- [Design Direction](./DESIGN.md)
+- [System Design Index](./docs/system-design/README.md)
+- [System Design: Overview](./docs/system-design/01-overview.md)
+- [System Design: Architecture Diagram](./docs/system-design/02-architecture-diagram.md)
+- [System Design: Components](./docs/system-design/03-components.md)
+- [System Design: Data Flow](./docs/system-design/04-data-flow.md)
+- [System Design: Technology Decisions](./docs/system-design/05-technology-decisions.md)
+- [System Design: Observability](./docs/system-design/06-observability.md)
+- [System Design: GenAI Design Usage](./docs/system-design/07-genai-design-usage.md)
 
 ## Stack
 
