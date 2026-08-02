@@ -1,0 +1,68 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  SALES
+  MANAGER
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  WON
+  LOST
+}
+
+model User {
+  id           String         @id @default(cuid())
+  email        String         @unique
+  passwordHash String
+  fullName     String
+  role         UserRole       @default(SALES)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  activities   LeadActivity[]
+  assignedLead Lead[]         @relation("AssignedSalesperson")
+}
+
+model Lead {
+  id                 String         @id @default(cuid())
+  firstName          String
+  lastName           String
+  email              String
+  phone              String?
+  message            String?
+  source             String         @default("website")
+  status             LeadStatus     @default(NEW)
+  assignedToId       String?
+  assignedTo         User?          @relation("AssignedSalesperson", fields: [assignedToId], references: [id], onDelete: SetNull)
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+  followUpActivities LeadActivity[]
+
+  @@index([status])
+  @@index([assignedToId])
+  @@index([createdAt])
+}
+
+model LeadActivity {
+  id         String   @id @default(cuid())
+  leadId     String
+  userId     String
+  type       String
+  note       String
+  happenedAt DateTime
+  createdAt  DateTime @default(now())
+  lead       Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@index([leadId, happenedAt])
+  @@index([userId])
+}

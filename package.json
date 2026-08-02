@@ -1,0 +1,27 @@
+{
+  "name": "keyloop-interview-challenge",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "apps/web",
+    "apps/api"
+  ],
+  "scripts": {
+    "dev": "concurrently -n web,api -c blue,green \"npm run dev:web\" \"npm run dev:api\"",
+    "dev:web": "cd apps/web && npm run dev",
+    "dev:api": "cd apps/api && npm run start:dev",
+    "build": "npm run build --workspace web && npm run build --workspace api",
+    "lint": "npm run lint --workspace web && npm run lint --workspace api",
+    "prisma:generate": "npm run prisma:generate --workspace api",
+    "prisma:migrate:dev": "npm run prisma:migrate:dev --workspace api",
+    "prisma:studio": "npm run prisma:studio --workspace api"
+  },
+  "devDependencies": {
+    "@nestjs/platform-express": "^11.0.1",
+    "concurrently": "^9.2.1"
+  },
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "packageManager": "pnpm@9.0.0+sha512.b4106707c7225b1748b61595953ccbebff97b54ad05d002aa3635f633b9c53cd666f7ce9b8bc44704f1fa048b9a49b55371ab2d9e9d667d1efe2ef1514bcd513"
+}
