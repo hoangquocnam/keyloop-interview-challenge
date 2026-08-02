@@ -1,7 +1,9 @@
 import { Card, Space, Typography, theme } from 'antd'
+import { useParams } from 'react-router-dom'
 import { designTokens } from '../../theme/design-tokens.ts'
 
-export const LeadInboxPage = () => {
+export const LeadDetailPage = () => {
+  const { leadId } = useParams()
   const { token } = theme.useToken()
 
   return (
@@ -16,7 +18,7 @@ export const LeadInboxPage = () => {
                 lineHeight: designTokens.typography.lineHeightHeading,
               }}
             >
-              Lead Inbox
+              Lead Detail
             </Typography.Title>
             <Typography.Paragraph
               style={{
@@ -25,8 +27,9 @@ export const LeadInboxPage = () => {
                 fontSize: token.fontSizeLG,
               }}
             >
-              Placeholder page for the lead inbox route. We can implement this
-              screen separately in the next step.
+              Placeholder page for lead detail route
+              {leadId ? `: ${leadId}` : ''}. We can implement this screen when
+              you give the next command.
             </Typography.Paragraph>
           </Space>
         </Card>

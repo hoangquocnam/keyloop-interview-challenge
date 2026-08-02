@@ -1,7 +1,7 @@
 import { Card, Space, Typography, theme } from 'antd'
 import { designTokens } from '../../theme/design-tokens.ts'
 
-export const LeadInboxPage = () => {
+export const LoginPage = () => {
   const { token } = theme.useToken()
 
   return (
@@ -16,7 +16,7 @@ export const LeadInboxPage = () => {
                 lineHeight: designTokens.typography.lineHeightHeading,
               }}
             >
-              Lead Inbox
+              Login
             </Typography.Title>
             <Typography.Paragraph
               style={{
@@ -25,8 +25,8 @@ export const LeadInboxPage = () => {
                 fontSize: token.fontSizeLG,
               }}
             >
-              Placeholder page for the lead inbox route. We can implement this
-              screen separately in the next step.
+              Placeholder page for the login route. We can build the actual login
+              form in a separate task.
             </Typography.Paragraph>
           </Space>
         </Card>

@@ -25,14 +25,64 @@ body {
   min-height: 100vh;
 }
 
-.app-page {
+.app-shell {
   min-height: 100vh;
+}
+
+.app-shell__header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  height: auto;
+  padding: 0;
+  line-height: normal;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.app-shell__header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 16px 24px;
+}
+
+.app-shell__brand {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.app-shell__actions {
+  display: flex;
+  align-items: center;
+}
+
+.app-shell__actions .ant-menu {
+  min-width: 260px;
+  border-bottom: 0;
+  background: transparent;
+}
+
+.app-shell__content {
+  min-height: calc(100vh - 88px);
+}
+
+.app-page {
+  min-height: 100%;
   padding: 32px 24px 48px;
 }
 
 .app-page__content {
   max-width: 1200px;
   margin: 0 auto;
+}
+
+.app-page__content--narrow {
+  max-width: 560px;
 }
 
 .app-grid {
@@ -79,6 +129,21 @@ body {
 }
 
 @media (max-width: 768px) {
+  .app-shell__header-content {
+    align-items: stretch;
+    flex-direction: column;
+    padding: 16px;
+  }
+
+  .app-shell__actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .app-shell__actions .ant-menu {
+    min-width: 0;
+  }
+
   .app-page {
     padding: 24px 16px 40px;
   }
