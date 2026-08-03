@@ -1,4 +1,5 @@
 import { makeAutoObservable } from 'mobx'
+import { AuthStore } from './auth-store.ts'
 
 class UiStore {
   sidebarCollapsed = false
@@ -17,6 +18,7 @@ class UiStore {
 }
 
 export class RootStore {
+  readonly auth = new AuthStore()
   readonly ui = new UiStore()
 
   constructor() {

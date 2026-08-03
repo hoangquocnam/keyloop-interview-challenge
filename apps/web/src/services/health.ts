@@ -1,10 +1,10 @@
+import { API_URL } from './api.ts'
+
 export type HealthResponse = {
   readonly status: string
   readonly service: string
   readonly timestamp: string
 }
-
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000/api'
 
 export const fetchApiHealth = async (): Promise<HealthResponse> => {
   const response = await fetch(`${API_URL}/health`)

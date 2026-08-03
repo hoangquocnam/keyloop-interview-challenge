@@ -1,13 +1,10 @@
-import { Layout, Menu, Space, Tag, Typography } from 'antd'
-import { Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { Button, Layout, Menu, Space, Tag, Typography } from 'antd'
+import { observer } from 'mobx-react-lite'
+import { Outlet, useNavigate } from 'react-router-dom'
 import { appRoutes } from './app/routes.ts'
+import { useRootStore } from './stores/use-root-store.ts'
 
 const navigationItems = [
-  {
-    key: 'login',
-    label: 'Login',
-    path: appRoutes.login,
-  },
   {
     key: 'leads',
     label: 'Lead inbox',
@@ -15,17 +12,13 @@ const navigationItems = [
   },
 ] as const
 
-const getSelectedNavigationKey = (pathname: string) => {
-  if (pathname.startsWith(appRoutes.login)) {
-    return 'login'
-  }
-
+const getSelectedNavigationKey = () => {
   return 'leads'
 }
 
-export const App = () => {
-  const location = useLocation()
+export const App = observer(() => {
   const navigate = useNavigate()
+  const { auth } = useRootStore()
 
   return (
     <Layout className="app-shell">
@@ -41,11 +34,11 @@ export const App = () => {
             </Typography.Text>
           </Space>
 
-          <div className="app-shell__actions">
+          <Space align="center" size="middle">
             <Menu
               mode="horizontal"
               selectable
-              selectedKeys={[getSelectedNavigationKey(location.pathname)]}
+              selectedKeys={[getSelectedNavigationKey()]}
               items={navigationItems.map((item) => ({
                 key: item.key,
                 label: item.label,
@@ -58,7 +51,25 @@ export const App = () => {
                 }
               }}
             />
-          </div>
+            <Space align="center" size={8}>
+              <Space direction="vertical" size={0}>
+                <Typography.Text strong>
+                  {auth.currentUser?.fullName ?? 'Authenticated User'}
+                </Typography.Text>
+                <Typography.Text type="secondary">
+                  {auth.currentUser?.email}
+                </Typography.Text>
+              </Space>
+              <Button
+                onClick={() => {
+                  auth.logout()
+                  void navigate(appRoutes.login)
+                }}
+              >
+                Sign Out
+              </Button>
+            </Space>
+          </Space>
         </div>
       </Layout.Header>
 
@@ -67,4 +78,4 @@ export const App = () => {
       </Layout.Content>
     </Layout>
   )
-}
+})

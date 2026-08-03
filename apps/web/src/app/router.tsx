@@ -3,33 +3,48 @@ import { App } from '../App.tsx'
 import { LoginPage } from '../pages/auth/LoginPage.tsx'
 import { LeadDetailPage } from '../pages/leads/LeadDetailPage.tsx'
 import { LeadInboxPage } from '../pages/leads/LeadInboxPage.tsx'
+import { RequireAuth, RequireGuest } from './route-guards.tsx'
 import { appRoutes } from './routes.ts'
 
 export const router = createBrowserRouter([
   {
-    path: appRoutes.login,
-    element: <LoginPage />,
-  },
-  {
-    path: appRoutes.root,
-    element: <App />,
+    element: <RequireGuest />,
     children: [
       {
-        index: true,
-        element: <Navigate replace to={appRoutes.login} />,
-      },
-      {
-        path: 'leads',
-        element: <LeadInboxPage />,
-      },
-      {
-        path: 'leads/:leadId',
-        element: <LeadDetailPage />,
-      },
-      {
-        path: '*',
-        element: <Navigate replace to={appRoutes.leads} />,
+        path: appRoutes.login,
+        element: <LoginPage />,
       },
     ],
+  },
+  {
+    element: <RequireAuth />,
+    children: [
+      {
+        path: appRoutes.root,
+        element: <App />,
+        children: [
+          {
+            index: true,
+            element: <Navigate replace to={appRoutes.leads} />,
+          },
+          {
+            path: 'leads',
+            element: <LeadInboxPage />,
+          },
+          {
+            path: 'leads/:leadId',
+            element: <LeadDetailPage />,
+          },
+          {
+            path: '*',
+            element: <Navigate replace to={appRoutes.leads} />,
+          },
+        ],
+      },
+    ],
+  },
+  {
+    path: '*',
+    element: <Navigate replace to={appRoutes.leads} />,
   },
 ])

@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: keyloop-challenge-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: keyloop_sales_leads
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - '5434:5432'
+    volumes:
+      - keyloop-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d keyloop_sales_leads']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  keyloop-postgres-data:

@@ -35,7 +35,7 @@ README.md
 
 - Node.js 20.19+
 - npm 10+
-- PostgreSQL running locally
+- Docker Desktop with Docker Compose support
 
 ## Getting started
 
@@ -52,11 +52,16 @@ README.md
    cp apps/web/.env.example apps/web/.env
    ```
 
-3. Create the database in local PostgreSQL:
+3. Start PostgreSQL in Docker:
 
    ```bash
-   createdb keyloop_sales_leads
+   npm run db:up
    ```
+
+   This starts PostgreSQL on `localhost:5434` using:
+   - database: `keyloop_sales_leads`
+   - username: `postgres`
+   - password: `postgres`
 
 4. Generate Prisma client and run migrations:
 
@@ -78,6 +83,9 @@ README.md
 - `npm run dev:api` runs only the Nest API
 - `npm run build` builds both apps
 - `npm run lint` runs lint in both apps
+- `npm run db:up` starts the Docker PostgreSQL service
+- `npm run db:down` stops the Docker PostgreSQL service
+- `npm run db:logs` tails the PostgreSQL container logs
 - `npm run prisma:studio` opens Prisma Studio
 
 ## Default local URLs

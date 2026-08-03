@@ -5,6 +5,7 @@ import {
 } from "@ant-design/icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Alert, Button, Card, Divider } from "antd";
+import { observer } from "mobx-react-lite";
 import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
@@ -21,11 +22,14 @@ import {
   SPACING,
   FONT,
 } from "../../theme/design-tokens.ts";
-import { demoCredentials } from "../../constants/mocks.ts";
+import { useRootStore } from "../../stores/use-root-store.ts";
 
-export const LoginPage = () => {
+export const LoginPage = observer(() => {
   const navigate = useNavigate();
-  const [isCredentialErrorVisible, setCredentialErrorVisible] = useState(false);
+  const { auth } = useRootStore();
+  const [credentialErrorMessage, setCredentialErrorMessage] = useState<
+    string | null
+  >(null);
   const method = useForm<LoginFormValues>({
     defaultValues: {
       email: "",
@@ -42,17 +46,15 @@ export const LoginPage = () => {
   } = method;
 
   const onSubmit = handleSubmit(async (values) => {
-    const hasMatchingCredentials =
-      values.email === demoCredentials.email &&
-      values.password === demoCredentials.password;
-
-    if (!hasMatchingCredentials) {
-      setCredentialErrorVisible(true);
-      return;
+    try {
+      setCredentialErrorMessage(null);
+      await auth.login(values);
+      void navigate(appRoutes.leads);
+    } catch (error) {
+      setCredentialErrorMessage(
+        error instanceof Error ? error.message : "Unable to sign in.",
+      );
     }
-
-    setCredentialErrorVisible(false);
-    void navigate(appRoutes.leads);
   });
 
   return (
@@ -105,7 +107,7 @@ export const LoginPage = () => {
               }}
             >
               <View flexDirection="column" gap={SPACING.lg}>
-                {isCredentialErrorVisible ? (
+                {credentialErrorMessage ? (
                   <Alert
                     description={null}
                     icon={<ExclamationCircleOutlined />}
@@ -113,16 +115,17 @@ export const LoginPage = () => {
                     style={{
                       borderRadius: BORDERS.radiusSm,
                     }}
-                    title="Invalid email or password"
+                    title={credentialErrorMessage}
                     type="error"
                   />
                 ) : null}
 
                 <View as="form" onSubmit={onSubmit}>
                   <FormInput<LoginFormValues>
+                    autoComplete="email"
                     id="login-email"
                     name="email"
-                    onValueChange={() => setCredentialErrorVisible(false)}
+                    onValueChange={() => setCredentialErrorMessage(null)}
                     placeholder="Enter your email"
                     prefix={<MailOutlined />}
                     style={{ marginBottom: SPACING.lg }}
@@ -130,9 +133,10 @@ export const LoginPage = () => {
                   />
 
                   <FormInputPassword<LoginFormValues>
+                    autoComplete="current-password"
                     id="login-password"
                     name="password"
-                    onValueChange={() => setCredentialErrorVisible(false)}
+                    onValueChange={() => setCredentialErrorMessage(null)}
                     placeholder="Enter your password"
                     prefix={<LockOutlined />}
                     style={{ marginBottom: SPACING.lg }}
@@ -144,7 +148,7 @@ export const LoginPage = () => {
                     htmlType="submit"
                     size="large"
                     block
-                    loading={isSubmitting}
+                    loading={isSubmitting || auth.isLoggingIn}
                     style={{
                       borderRadius: BORDERS.radiusXs,
                       fontSize: FONT.fontSizeLg,
@@ -174,4 +178,4 @@ export const LoginPage = () => {
       </View>
     </FormProvider>
   );
-};
+});
