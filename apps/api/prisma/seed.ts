@@ -5,11 +5,15 @@ const prisma = new PrismaClient();
 
 async function main() {
   const salesUser = await prisma.user.upsert({
-    where: { email: 'sales@example.com' },
-    update: {},
+    where: { email: 'admin@leadstream.com' },
+    update: {
+      fullName: 'LeadStream Admin',
+      passwordHash: hashSync('Password123!', 10),
+      role: UserRole.SALES,
+    },
     create: {
-      email: 'sales@example.com',
-      fullName: 'Demo Salesperson',
+      email: 'admin@leadstream.com',
+      fullName: 'LeadStream Admin',
       passwordHash: hashSync('Password123!', 10),
       role: UserRole.SALES,
     },
