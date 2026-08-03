@@ -7,16 +7,16 @@ import { appRoutes } from './routes.ts'
 
 export const router = createBrowserRouter([
   {
+    path: appRoutes.login,
+    element: <LoginPage />,
+  },
+  {
     path: appRoutes.root,
     element: <App />,
     children: [
       {
         index: true,
-        element: <Navigate replace to={appRoutes.leads} />,
-      },
-      {
-        path: 'login',
-        element: <LoginPage />,
+        element: <Navigate replace to={appRoutes.login} />,
       },
       {
         path: 'leads',

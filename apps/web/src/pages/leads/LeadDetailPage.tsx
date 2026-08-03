@@ -1,6 +1,6 @@
 import { Card, Space, Typography, theme } from 'antd'
 import { useParams } from 'react-router-dom'
-import { designTokens } from '../../theme/design-tokens.ts'
+import { FONT } from '../../theme/design-tokens.ts'
 
 export const LeadDetailPage = () => {
   const { leadId } = useParams()
@@ -15,7 +15,7 @@ export const LeadDetailPage = () => {
               level={1}
               style={{
                 margin: 0,
-                lineHeight: designTokens.typography.lineHeightHeading,
+                lineHeight: FONT.lineHeightHeading,
               }}
             >
               Lead Detail

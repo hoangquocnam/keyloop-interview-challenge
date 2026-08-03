@@ -1,5 +1,5 @@
 import { Card, Space, Typography, theme } from 'antd'
-import { designTokens } from '../../theme/design-tokens.ts'
+import { FONT } from '../../theme/design-tokens.ts'
 
 export const LeadInboxPage = () => {
   const { token } = theme.useToken()
@@ -13,7 +13,7 @@ export const LeadInboxPage = () => {
               level={1}
               style={{
                 margin: 0,
-                lineHeight: designTokens.typography.lineHeightHeading,
+                lineHeight: FONT.lineHeightHeading,
               }}
             >
               Lead Inbox
