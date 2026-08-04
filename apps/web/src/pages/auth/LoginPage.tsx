@@ -4,12 +4,13 @@ import {
   MailOutlined,
 } from "@ant-design/icons";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Alert, Button, Card, Divider } from "antd";
+import { Alert, Card, Divider } from "antd";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { appRoutes } from "../../app/routes.ts";
+import { Button } from "../../components/Button";
 import { FormInput, FormInputPassword } from "../../components/Input/index.ts";
 import { Text } from "../../components/Text/index.ts";
 import { View } from "../../components/View/index.ts";
@@ -144,7 +145,6 @@ export const LoginPage = observer(() => {
                   />
 
                   <Button
-                    type="primary"
                     htmlType="submit"
                     size="large"
                     block
@@ -156,6 +156,7 @@ export const LoginPage = observer(() => {
                       height: 44,
                       marginTop: SPACING.xs,
                     }}
+                    variant="primary"
                   >
                     Sign In
                   </Button>

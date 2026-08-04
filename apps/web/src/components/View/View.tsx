@@ -11,7 +11,13 @@ type ViewOwnProps<T extends ElementType = "div"> = {
   readonly backgroundColor?: CSSProperties["backgroundColor"];
   readonly borderColor?: CSSProperties["borderColor"];
   readonly borderRadius?: CSSProperties["borderRadius"];
+  readonly borderBottomStyle?: CSSProperties["borderBottomStyle"];
+  readonly borderBottomWidth?: CSSProperties["borderBottomWidth"];
+  readonly borderRightStyle?: CSSProperties["borderRightStyle"];
+  readonly borderRightWidth?: CSSProperties["borderRightWidth"];
   readonly borderStyle?: CSSProperties["borderStyle"];
+  readonly borderTopStyle?: CSSProperties["borderTopStyle"];
+  readonly borderTopWidth?: CSSProperties["borderTopWidth"];
   readonly borderWidth?: CSSProperties["borderWidth"];
   readonly bottom?: CSSProperties["bottom"];
   readonly boxShadow?: CSSProperties["boxShadow"];
@@ -57,7 +63,7 @@ type ViewOwnProps<T extends ElementType = "div"> = {
 };
 
 type ViewProps<T extends ElementType = "div"> = ViewOwnProps<T> &
-  Omit<ComponentPropsWithoutRef<T>, keyof ViewOwnProps<T>>;
+  Omit<ComponentPropsWithoutRef<T>, 'children' | keyof ViewOwnProps>;
 
 export const View = <T extends ElementType = "div">({
   alignItems,
@@ -65,7 +71,13 @@ export const View = <T extends ElementType = "div">({
   backgroundColor,
   borderColor,
   borderRadius,
+  borderBottomStyle,
+  borderBottomWidth,
+  borderRightStyle,
+  borderRightWidth,
   borderStyle,
+  borderTopStyle,
+  borderTopWidth,
   borderWidth,
   bottom,
   boxShadow,
@@ -132,7 +144,13 @@ export const View = <T extends ElementType = "div">({
         backgroundColor,
         borderColor,
         borderRadius,
+        borderBottomStyle,
+        borderBottomWidth,
+        borderRightStyle,
+        borderRightWidth,
         borderStyle,
+        borderTopStyle,
+        borderTopWidth,
         borderWidth,
         bottom,
         boxShadow,
