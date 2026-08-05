@@ -3,14 +3,14 @@ import { Badge, Input } from "antd";
 import { observer } from "mobx-react-lite";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { appRoutes } from "./app/routes.ts";
-import { Button } from "./components/Button";
+
 import {
   type ShellNavigationKey,
   shellTopbarContent,
 } from "./constants/mocks.ts";
 import { Sidebar } from "./components/Sidebar";
 import { useRootStore } from "./stores/use-root-store.ts";
-import { View } from "./components/View/index.ts";
+import { View, Button } from "@/components/ui";
 import { queryClient } from "./app/query-client.ts";
 import { queryKeys } from "./app/query-keys.ts";
 import { BORDERS, COLORS, FONT } from "./theme/design-tokens.ts";
@@ -63,7 +63,9 @@ export const App = observer(() => {
             void navigate(path);
           }}
           onSignOut={() => {
-            queryClient.removeQueries({ queryKey: queryKeys.leadInbox(lead.query) });
+            queryClient.removeQueries({
+              queryKey: queryKeys.leadInbox(lead.query),
+            });
             rootStore.logOut();
             void navigate(appRoutes.login);
           }}

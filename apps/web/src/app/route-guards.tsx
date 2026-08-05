@@ -1,11 +1,10 @@
 import { Spin } from 'antd'
 import { observer } from 'mobx-react-lite'
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
-import { Text } from '../components/Text/index.ts'
-import { View } from '../components/View/index.ts'
-import { COLORS, SPACING } from '../theme/design-tokens.ts'
+import { Text, View } from '@/components/ui'
+import { COLORS, SPACING } from '@/theme/design-tokens.ts'
 import { appRoutes } from './routes.ts'
-import { useRootStore } from '../stores/use-root-store.ts'
+import { useRootStore } from '@/stores/use-root-store.ts'
 
 const AuthGuardFallback = () => {
   return (

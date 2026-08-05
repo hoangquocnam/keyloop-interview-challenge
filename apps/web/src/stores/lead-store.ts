@@ -10,7 +10,7 @@ import {
   getLeadSortLabel,
   getLeadSourceLabel,
   getLeadStatusLabel,
-} from "../enums/lead.ts";
+} from "../enums/lead.enums.ts";
 import type { LeadInboxResponse, ListLeadsParams } from "../services/lead.types.ts";
 
 const DEFAULT_PAGE_SIZE = 20;

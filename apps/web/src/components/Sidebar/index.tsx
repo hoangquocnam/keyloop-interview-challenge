@@ -3,18 +3,18 @@ import {
   QuestionCircleOutlined,
   SettingOutlined,
   TeamOutlined,
+  HomeOutlined,
+  LogoutOutlined,
 } from "@ant-design/icons";
 import { Avatar } from "antd";
-import { Button } from "../Button";
 import {
   shellFooterLinks,
   shellNavigationItems,
   type ShellNavigationKey,
 } from "../../constants/mocks.ts";
 import type { ReactNode } from "react";
-import { COLORS, FONT } from "../../theme/design-tokens.ts";
-import { Text } from "../Text/index.ts";
-import { View } from "../View/index.ts";
+import { COLORS, FONT } from "@/theme/design-tokens.ts";
+import { Text, View, Button } from "@/components/ui";
 
 const navigationIconMap: Record<ShellNavigationKey, ReactNode> = {
   dashboard: <AppstoreOutlined style={{ fontSize: 18 }} />,
@@ -43,7 +43,7 @@ export const Sidebar = ({
 }: SidebarProps) => {
   return (
     <View
-      backgroundColor="surface"
+      backgroundColor="gray100"
       border="1px solid #e5e7eb"
       flexDirection="column"
       justifyContent="space-between"
@@ -55,12 +55,12 @@ export const Sidebar = ({
             <View
               alignItems="center"
               backgroundColor="black"
-              borderRadius={2}
-              height={34}
+              borderRadius={8}
+              height={40}
               justifyContent="center"
-              width={34}
+              width={40}
             >
-              <AppstoreOutlined style={{ color: COLORS.white, fontSize: 16 }} />
+              <HomeOutlined style={{ color: COLORS.white, fontSize: 16 }} />
             </View>
 
             <View flexDirection="column" gap={2}>
@@ -81,8 +81,7 @@ export const Sidebar = ({
             return (
               <Button
                 alignItems="center"
-                backgroundColor={isActive ? "gray100" : "transparent"}
-                borderRadius={0}
+                backgroundColor={isActive ? "gray200" : "transparent"}
                 textColor="text"
                 display="flex"
                 fontSize={FONT.fontSizeLg}
@@ -105,7 +104,14 @@ export const Sidebar = ({
               >
                 <View alignItems="center" flexDirection="row" gap="sm">
                   {navigationIconMap[item.key]}
-                  <span>{item.label}</span>
+                  <Text
+                    fontSize={FONT.fontSizeLg}
+                    weight={
+                      isActive ? FONT.fontWeightBold : FONT.fontWeightMedium
+                    }
+                  >
+                    {item.label}
+                  </Text>
                 </View>
               </Button>
             );
@@ -137,46 +143,53 @@ export const Sidebar = ({
           >
             <View alignItems="center" flexDirection="row" gap="sm">
               {footerIconMap[item.key]}
-              <span>{item.label}</span>
+              <Text fontSize={FONT.fontSizeLg} weight={FONT.fontWeightSemibold}>
+                {item.label}
+              </Text>
             </View>
           </Button>
         ))}
 
         <Button
           alignItems="center"
+          textColor="textSecondary"
           display="flex"
-          height={52}
+          fontSize={FONT.fontSizeMd}
+          fontWeight={FONT.fontWeightMedium}
+          height={38}
           justifyContent="flex-start"
           onClick={onSignOut}
           px={0}
           variant="link"
         >
           <View alignItems="center" flexDirection="row" gap="sm">
-            <Avatar
-              size={30}
-              style={{
-                backgroundColor: "#dbeafe",
-                color: COLORS.black,
-                fontSize: FONT.fontSizeXs,
-                fontWeight: FONT.fontWeightBold,
-              }}
-            >
-              {userInitials}
-            </Avatar>
-            <View flexDirection="column" gap={2}>
-              <Text
-                color="text"
-                fontSize={FONT.fontSizeMd}
-                weight={FONT.fontWeightMedium}
-              >
-                Sign Out
-              </Text>
-              <Text color="textTertiary" fontSize={FONT.fontSizeSm}>
-                {userEmail}
-              </Text>
-            </View>
+            <LogoutOutlined style={{ fontSize: 18, color: COLORS.error }} />
+            <Text fontSize={FONT.fontSizeLg} weight={FONT.fontWeightSemibold} color="error">
+              Sign Out
+            </Text>
           </View>
         </Button>
+
+        <View alignItems="center" flexDirection="row" gap="sm">
+          <Avatar
+            size={30}
+            style={{
+              backgroundColor: "#dbeafe",
+              color: COLORS.black,
+              fontSize: FONT.fontSizeXs,
+              fontWeight: FONT.fontWeightBold,
+            }}
+          >
+            {userInitials}
+          </Avatar>
+          <View flexDirection="column" gap={2}>
+            <Text color="textTertiary" fontSize={FONT.fontSizeMd}>
+              {userEmail}
+            </Text>
+
+            <View alignItems="center" flexDirection="row" gap="xs"></View>
+          </View>
+        </View>
       </View>
     </View>
   );

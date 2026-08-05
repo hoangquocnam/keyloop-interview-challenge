@@ -1,7 +1,7 @@
 import { Button as AntButton } from "antd";
 import type { ButtonProps as AntButtonProps } from "antd";
 import type { CSSProperties, ReactNode } from "react";
-import { BORDERS, COLORS, FONT, SPACING } from "../../theme/design-tokens.ts";
+import { BORDERS, COLORS, FONT, SPACING } from "@/theme/design-tokens.ts";
 import {
   type TokenBorderValue,
   type TokenColorValue,
@@ -9,7 +9,7 @@ import {
   resolveBorderToken,
   resolveColorToken,
   resolveSpacingToken,
-} from "../../theme/token-style.ts";
+} from "@/theme/token-style.ts";
 
 type ButtonVariant = "primary" | "outline" | "link";
 type ButtonSize = "sm" | "md" | "lg";

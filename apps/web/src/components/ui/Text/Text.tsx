@@ -1,11 +1,11 @@
 import type { CSSProperties, ElementType, ReactNode } from 'react'
-import { FONT } from '../../theme/design-tokens.ts'
+import { FONT } from '@/theme/design-tokens.ts'
 import {
   type TokenColorValue,
   type TokenSpacingValue,
   resolveColorToken,
   resolveSpacingToken,
-} from '../../theme/token-style.ts'
+} from '@/theme/token-style.ts'
 
 type TextVariant = 'small' | 'medium' | 'large'
 

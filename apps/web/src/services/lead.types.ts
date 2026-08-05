@@ -4,7 +4,7 @@ import type {
   LeadSource,
   LeadStatusTone,
   LeadStatusValue,
-} from "../enums/lead.ts";
+} from "../enums/lead.enums.ts";
 
 export type LeadInboxAssignee = {
   fullName: string;

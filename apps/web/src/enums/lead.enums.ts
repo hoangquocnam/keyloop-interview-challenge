@@ -70,7 +70,7 @@ export const LEAD_STATUS_OPTIONS = [
 
 export const LEAD_SOURCE_OPTIONS = [
   {
-    label: "All",
+    label: "ALL",
     value: "ALL",
   },
   {

@@ -1,16 +1,15 @@
-import { useParams } from 'react-router-dom'
-import { Text } from '../../components/Text/index.ts'
-import { View } from '../../components/View/index.ts'
+import { useParams } from "react-router-dom";
+import { Text, View } from "@/components/ui";
 import {
   BORDERS,
   COLORS,
   FONT,
   SHADOW,
   SPACING,
-} from '../../theme/design-tokens.ts'
+} from "@/theme/design-tokens.ts";
 
 export const LeadDetailPage = () => {
-  const { leadId } = useParams()
+  const { leadId } = useParams();
 
   return (
     <View flexDirection="column" gap={SPACING.lg} maxWidth={680}>
@@ -26,7 +25,7 @@ export const LeadDetailPage = () => {
         </Text>
         <Text color={COLORS.textSecondary} fontSize={FONT.fontSizeXl}>
           Placeholder page for lead detail route
-          {leadId ? `: ${leadId}` : ''}. We can implement this screen when you
+          {leadId ? `: ${leadId}` : ""}. We can implement this screen when you
           give the next command.
         </Text>
       </View>
@@ -46,5 +45,5 @@ export const LeadDetailPage = () => {
         </Text>
       </View>
     </View>
-  )
-}
+  );
+};

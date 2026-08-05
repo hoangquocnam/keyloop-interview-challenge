@@ -9,20 +9,18 @@ import { observer } from "mobx-react-lite";
 import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
-import { appRoutes } from "../../app/routes.ts";
-import { Button } from "../../components/Button";
-import { FormInput, FormInputPassword } from "../../components/Input/index.ts";
-import { Text } from "../../components/Text/index.ts";
-import { View } from "../../components/View/index.ts";
-import { loginSchema } from "../../constants/validations/auth.ts";
-import type { LoginFormValues } from "../../constants/validations/auth.ts";
+import { appRoutes } from "@/app/routes.ts";
+import { Button, Text, View } from "@/components/ui";
+import { FormInput, FormInputPassword } from "@/components/ui/Input/index.ts";
+import { loginSchema } from "@/validations/auth.ts";
+import type { LoginFormValues } from "@/validations/auth.ts";
 import {
   BORDERS,
   SHADOW,
   SPACING,
   FONT,
-} from "../../theme/design-tokens.ts";
-import { useRootStore } from "../../stores/use-root-store.ts";
+} from "@/theme/design-tokens.ts";
+import { useRootStore } from "@/stores/use-root-store.ts";
 
 export const LoginPage = observer(() => {
   const navigate = useNavigate();

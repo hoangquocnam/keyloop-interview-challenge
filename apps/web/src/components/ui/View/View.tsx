@@ -13,7 +13,7 @@ import {
   resolveColorToken,
   resolveShadowToken,
   resolveSpacingToken,
-} from "../../theme/token-style.ts";
+} from "@/theme/token-style.ts";
 
 type ViewOwnProps<T extends ElementType = "div"> = {
   alignItems?: CSSProperties["alignItems"];
@@ -77,7 +77,7 @@ type ViewOwnProps<T extends ElementType = "div"> = {
 };
 
 type ViewProps<T extends ElementType = "div"> = ViewOwnProps<T> &
-  Omit<ComponentPropsWithoutRef<T>, 'children' | keyof ViewOwnProps>;
+  Omit<ComponentPropsWithoutRef<T>, "children" | keyof ViewOwnProps | "gap">;
 
 export const View = <T extends ElementType = "div">({
   alignItems,
@@ -173,7 +173,6 @@ export const View = <T extends ElementType = "div">({
         border,
         bottom,
         boxShadow: resolveShadowToken(boxShadow),
-        columnGap: resolveSpacingToken(columnGap),
         cursor,
         display: resolvedDisplay,
         flex,
@@ -205,7 +204,6 @@ export const View = <T extends ElementType = "div">({
         paddingTop: resolveSpacingToken(pt ?? py),
         position,
         right,
-        rowGap: resolveSpacingToken(rowGap),
         top,
         width,
         ...style,

@@ -1,33 +1,21 @@
 import { Input } from "antd";
-import type { InputProps } from "antd";
-import type { CSSProperties, ReactNode } from "react";
+import type { CSSProperties } from "react";
 import { Controller, useFormContext } from "react-hook-form";
-import type { FieldValues, Path } from "react-hook-form";
+import type { FieldValues } from "react-hook-form";
 import {
   BORDERS,
   COLORS,
   SPACING,
-} from "../../theme/design-tokens.ts";
+} from "@/theme/design-tokens.ts";
 import { Text } from "../Text/index.ts";
 import { View } from "../View/index.ts";
+import type { BaseFormInputProps } from "./FormInput.tsx";
+import type { PasswordProps } from "antd/es/input/Password";
 
-export type BaseFormInputProps<TFieldValues extends FieldValues> = {
-  readonly autoComplete?: string;
-  readonly disabled?: boolean;
-  readonly id?: string;
-  readonly labelAction?: ReactNode;
-  readonly name: Path<TFieldValues>;
-  readonly onValueChange?: () => void;
-  readonly placeholder?: string;
-  readonly prefix?: ReactNode;
-  readonly style?: CSSProperties;
-  readonly text?: ReactNode;
-};
-
-type FormInputProps<TFieldValues extends FieldValues> =
+type FormInputPasswordProps<TFieldValues extends FieldValues> =
   BaseFormInputProps<TFieldValues> &
     Omit<
-      InputProps,
+      PasswordProps,
       | "className"
       | "defaultValue"
       | "disabled"
@@ -37,7 +25,7 @@ type FormInputProps<TFieldValues extends FieldValues> =
       | "size"
     >;
 
-export const FormInput = <TFieldValues extends FieldValues>({
+export const FormInputPassword = <TFieldValues extends FieldValues>({
   autoComplete,
   disabled,
   id,
@@ -49,8 +37,8 @@ export const FormInput = <TFieldValues extends FieldValues>({
   style,
   text,
   ...restProps
-}: FormInputProps<TFieldValues>) => {
-  const { control: formControl } = useFormContext();
+}: FormInputPasswordProps<TFieldValues>) => {
+  const { control } = useFormContext();
   return (
     <View flexDirection="column" gap={SPACING.xs} style={style}>
       {text ? (
@@ -71,7 +59,7 @@ export const FormInput = <TFieldValues extends FieldValues>({
       ) : null}
 
       <Controller
-        control={formControl}
+        control={control}
         name={name}
         render={({ field, fieldState }) => {
           const sharedProps = {
@@ -87,18 +75,21 @@ export const FormInput = <TFieldValues extends FieldValues>({
           };
 
           return (
-            <View>
-              <Input
+            <>
+              <Input.Password
                 {...sharedProps}
+                iconRender={() => null}
                 onChange={(event) => {
                   onValueChange?.();
                   field.onChange(event);
                 }}
                 status={fieldState.error ? "error" : undefined}
-                style={{
-                  borderRadius: BORDERS.radiusSm,
-                  height: 48,
-                }}
+                style={
+                  {
+                    borderRadius: BORDERS.radiusSm,
+                    height: 48,
+                  } as CSSProperties
+                }
               />
 
               {fieldState.error?.message ? (
@@ -111,7 +102,7 @@ export const FormInput = <TFieldValues extends FieldValues>({
                   {fieldState.error.message}
                 </Text>
               ) : null}
-            </View>
+            </>
           );
         }}
       />

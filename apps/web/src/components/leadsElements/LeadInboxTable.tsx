@@ -1,4 +1,4 @@
-import { Avatar, Checkbox, Spin, Table } from "antd";
+import { Avatar, Spin, Table } from "antd";
 import type { TableColumnsType } from "antd";
 import { useEffect, useMemo, useRef } from "react";
 import { Text, View } from "@/components/ui"
@@ -62,19 +62,6 @@ export const LeadInboxTable = ({
 
   const columns = useMemo<TableColumnsType<LeadInboxItem>>(
     () => [
-      {
-        dataIndex: "selected",
-        key: "selected",
-        onHeaderCell: () => ({
-          style: {
-            ...headerCellStyle,
-            width: 56,
-          },
-        }),
-        render: (_value, row) => <Checkbox checked={row.id === selectedLeadId} />,
-        title: <Checkbox checked={false} />,
-        width: 56,
-      },
       {
         dataIndex: "customerName",
         key: "customerName",
@@ -187,10 +174,8 @@ export const LeadInboxTable = ({
     <View
       backgroundColor="surface"
       borderColor="border"
-      borderRadius={2}
       borderStyle="solid"
       borderWidth={1}
-      overflow="hidden"
       width="100%"
     >
       <div ref={tableWrapperRef} style={{ width: "100%" }}>

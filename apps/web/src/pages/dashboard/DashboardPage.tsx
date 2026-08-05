@@ -1,14 +1,13 @@
 import { Empty } from 'antd'
 import { dashboardPageContent } from '../../constants/mocks.ts'
-import { Text } from '../../components/Text/index.ts'
-import { View } from '../../components/View/index.ts'
+import { Text, View } from '@/components/ui'
 import {
   BORDERS,
   COLORS,
   FONT,
   SHADOW,
   SPACING,
-} from '../../theme/design-tokens.ts'
+} from '@/theme/design-tokens.ts'
 
 export const DashboardPage = () => {
   return (
