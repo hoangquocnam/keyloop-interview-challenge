@@ -1,4 +1,5 @@
 import { LeadStatus, PrismaClient, UserRole } from '@prisma/client';
+import type { LeadSource } from '@prisma/client';
 import { hashSync } from 'bcryptjs';
 
 const prisma = new PrismaClient();
@@ -6,13 +7,27 @@ const prisma = new PrismaClient();
 const now = Date.now();
 const legacyDemoLeadEmails = ['jamie.brooks@example.com'] as const;
 
-const demoLeads = [
+type DemoLeadSeed = {
+  readonly activityNote: string;
+  readonly activityType: string;
+  readonly assignedUserEmail: string | null;
+  readonly email: string;
+  readonly firstName: string;
+  readonly happenedAt: Date;
+  readonly lastName: string;
+  readonly message: string;
+  readonly phone: string | null;
+  readonly source: LeadSource;
+  readonly status: LeadStatus;
+};
+
+const featuredDemoLeads: readonly DemoLeadSeed[] = [
   {
     firstName: 'Michael',
     lastName: 'Scott',
     email: 'm.scott@dundermifflin.com',
     phone: '(555) 123-4567',
-    source: 'Website Form',
+    source: 'website_form',
     status: LeadStatus.NEW,
     message: 'Interested in pricing for the latest SUV lineup.',
     assignedUserEmail: 'jim.halpert@leadstream.com',
@@ -25,7 +40,7 @@ const demoLeads = [
     lastName: 'Connor',
     email: 's.connor@sky.net',
     phone: '(555) 987-6543',
-    source: 'Phone Inbound',
+    source: 'phone_inbound',
     status: LeadStatus.CONTACTED,
     message: 'Asked about availability for hybrid inventory.',
     assignedUserEmail: 'dwight.schrute@leadstream.com',
@@ -38,7 +53,7 @@ const demoLeads = [
     lastName: 'Wayne',
     email: 'b.wayne@wayneent.com',
     phone: null,
-    source: 'Walk-in',
+    source: 'walk_in',
     status: LeadStatus.QUALIFIED,
     message: 'Requested a quote for a fleet-ready luxury SUV.',
     assignedUserEmail: 'pam.beesly@leadstream.com',
@@ -51,7 +66,7 @@ const demoLeads = [
     lastName: 'Dent',
     email: 'a.dent@hitchhiker.org',
     phone: '(555) 424-2424',
-    source: 'Website Form',
+    source: 'website_form',
     status: LeadStatus.NEW,
     message: 'Needs a compact vehicle after an unexpected trip.',
     assignedUserEmail: null,
@@ -59,7 +74,143 @@ const demoLeads = [
     activityNote: 'Lead captured from the website form.',
     happenedAt: new Date(now - 3 * 60 * 60 * 1000),
   },
+  {
+    firstName: 'Leslie',
+    lastName: 'Knope',
+    email: 'l.knope@pawnee.gov',
+    phone: '(555) 314-1592',
+    source: 'website_form',
+    status: LeadStatus.NEW,
+    message: 'Looking for a reliable hybrid SUV for city travel.',
+    assignedUserEmail: 'pam.beesly@leadstream.com',
+    activityType: 'lead_created',
+    activityNote: 'Lead submitted from the website form.',
+    happenedAt: new Date(now - 5 * 60 * 60 * 1000),
+  },
+  {
+    firstName: 'Dana',
+    lastName: 'Scully',
+    email: 'd.scully@fbi.gov',
+    phone: '(555) 246-8101',
+    source: 'phone_inbound',
+    status: LeadStatus.CONTACTED,
+    message: 'Requested a callback about financing options.',
+    assignedUserEmail: 'jim.halpert@leadstream.com',
+    activityType: 'call_logged',
+    activityNote: 'Inbound call captured and pricing follow-up requested.',
+    happenedAt: new Date(now - 6 * 60 * 60 * 1000),
+  },
+  {
+    firstName: 'Jean-Luc',
+    lastName: 'Picard',
+    email: 'j.picard@starfleet.space',
+    phone: '(555) 170-1701',
+    source: 'walk_in',
+    status: LeadStatus.QUALIFIED,
+    message: 'Qualified for executive transport package and quote.',
+    assignedUserEmail: 'dwight.schrute@leadstream.com',
+    activityType: 'quote_sent',
+    activityNote: 'Quote sent after premium trim discussion.',
+    happenedAt: new Date(now - 2 * 24 * 60 * 60 * 1000),
+  },
+  {
+    firstName: 'Ellen',
+    lastName: 'Ripley',
+    email: 'e.ripley@weylandyutani.com',
+    phone: '(555) 777-4269',
+    source: 'website_form',
+    status: LeadStatus.NEW,
+    message: 'Needs cargo space details before scheduling a visit.',
+    assignedUserEmail: null,
+    activityType: 'lead_created',
+    activityNote: 'Lead captured from the website form.',
+    happenedAt: new Date(now - 30 * 60 * 1000),
+  },
+];
+
+const generatedStatuses = [
+  LeadStatus.NEW,
+  LeadStatus.CONTACTED,
+  LeadStatus.QUALIFIED,
 ] as const;
+
+const generatedSources = [
+  'website_form',
+  'phone_inbound',
+  'walk_in',
+] as const;
+
+const generatedAssignees = [
+  'jim.halpert@leadstream.com',
+  'dwight.schrute@leadstream.com',
+  'pam.beesly@leadstream.com',
+  null,
+] as const;
+
+const generatedActivityTypes = [
+  'lead_created',
+  'call_logged',
+  'quote_sent',
+] as const;
+
+const generatedFirstNames = [
+  'Alex',
+  'Taylor',
+  'Jordan',
+  'Morgan',
+  'Casey',
+  'Sam',
+  'Riley',
+  'Jamie',
+  'Avery',
+  'Quinn',
+] as const;
+
+const generatedLastNames = [
+  'Nguyen',
+  'Tran',
+  'Le',
+  'Pham',
+  'Hoang',
+  'Vo',
+  'Bui',
+  'Do',
+  'Huynh',
+  'Dang',
+] as const;
+
+const bulkDemoLeads: readonly DemoLeadSeed[] = new Array(50)
+  .fill(null)
+  .map((_, index) => {
+    const firstName = generatedFirstNames[index % generatedFirstNames.length];
+    const lastName =
+      generatedLastNames[Math.floor(index / generatedFirstNames.length) % generatedLastNames.length];
+    const status = generatedStatuses[index % generatedStatuses.length];
+    const source = generatedSources[index % generatedSources.length];
+    const assignedUserEmail = generatedAssignees[index % generatedAssignees.length];
+    const activityType =
+      generatedActivityTypes[index % generatedActivityTypes.length];
+    const minutesAgo = (index + 1) * 37;
+
+    return {
+      firstName,
+      lastName,
+      email: `lead${index + 1}@leadstream.demo`,
+      phone: `(555) ${String(1000000 + index).slice(0, 3)}-${String(1000 + index).slice(-4)}`,
+      source,
+      status,
+      message: `Demo lead ${index + 1} requesting more information about available vehicles and financing options.`,
+      assignedUserEmail,
+      activityType,
+      activityNote: `Auto-generated demo activity ${index + 1}.`,
+      happenedAt: new Date(now - minutesAgo * 60 * 1000),
+    };
+  });
+
+const demoLeads: readonly DemoLeadSeed[] = [
+  ...featuredDemoLeads,
+  ...bulkDemoLeads,
+];
 
 async function main() {
   const salesUser = await prisma.user.upsert({

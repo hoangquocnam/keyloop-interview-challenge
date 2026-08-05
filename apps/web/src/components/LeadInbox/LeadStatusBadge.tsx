@@ -1,36 +1,36 @@
-import type { LeadStatusTone } from '../../constants/mocks.ts'
+import type { LeadStatusTone } from '../../enums/lead.ts'
 import { Text } from '../Text/index.ts'
 import { View } from '../View/index.ts'
-import { BORDERS, COLORS, FONT, SPACING } from '../../theme/design-tokens.ts'
+import { FONT } from '../../theme/design-tokens.ts'
 
 const toneStyles: Record<
   LeadStatusTone,
   {
-    readonly backgroundColor: string
-    readonly borderColor: string
-    readonly color: string
+    backgroundColor: string
+    borderColor: string
+    color: string
   }
 > = {
   info: {
-    backgroundColor: '#eef4ff',
-    borderColor: '#cfe0ff',
-    color: COLORS.info,
+    backgroundColor: 'info_50',
+    borderColor: 'info_100',
+    color: 'info',
   },
   neutral: {
-    backgroundColor: COLORS.gray100,
-    borderColor: COLORS.gray200,
-    color: COLORS.gray700,
+    backgroundColor: 'gray100',
+    borderColor: 'gray200',
+    color: 'gray700',
   },
   success: {
-    backgroundColor: '#ecfdf3',
-    borderColor: '#b7efd0',
-    color: '#0d8a55',
+    backgroundColor: 'success_50',
+    borderColor: 'success_200',
+    color: 'success',
   },
 }
 
 type LeadStatusBadgeProps = {
-  readonly label: string
-  readonly tone: LeadStatusTone
+  label: string
+  tone: LeadStatusTone
 }
 
 export const LeadStatusBadge = ({
@@ -44,19 +44,19 @@ export const LeadStatusBadge = ({
       alignItems="center"
       backgroundColor={toneStyle.backgroundColor}
       borderColor={toneStyle.borderColor}
-      borderRadius={BORDERS.radiusXs}
+      borderRadius={2}
       borderStyle="solid"
       borderWidth={1}
       justifyContent="center"
       minWidth={62}
-      px={SPACING.xs}
+      px="xs"
       py={4}
       width="fit-content"
     >
       <Text
         color={toneStyle.color}
         fontSize={FONT.fontSizeSm}
-        style={{ letterSpacing: 0.6 }}
+        letterSpacing={0.6}
         weight={FONT.fontWeightBold}
       >
         {label}

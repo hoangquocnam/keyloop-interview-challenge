@@ -1,15 +1,19 @@
-import { LeadStatus } from '@prisma/client';
+import { LeadSource, LeadStatus } from '@prisma/client';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import {
-  IsEnum,
-  IsInt,
-  IsOptional,
-  IsString,
-  Max,
-  MaxLength,
-  Min,
-} from 'class-validator';
+import { IsEnum, IsInt, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
+
+export enum LeadSortBy {
+  CREATED_AT = 'createdAt',
+  CUSTOMER_NAME = 'customerName',
+  SOURCE = 'source',
+  STATUS = 'status',
+}
+
+export enum LeadSortOrder {
+  ASC = 'asc',
+  DESC = 'desc',
+}
 
 export class ListLeadsQueryDto {
   @ApiPropertyOptional({
@@ -25,13 +29,10 @@ export class ListLeadsQueryDto {
   @IsEnum(LeadStatus)
   status?: LeadStatus;
 
-  @ApiPropertyOptional({
-    description: 'Filter by lead source label, for example Website Form.',
-  })
+  @ApiPropertyOptional({ enum: LeadSource })
   @IsOptional()
-  @IsString()
-  @MaxLength(80)
-  source?: string;
+  @IsEnum(LeadSource)
+  source?: LeadSource;
 
   @ApiPropertyOptional({ default: 1, minimum: 1 })
   @Type(() => Number)
@@ -46,5 +47,15 @@ export class ListLeadsQueryDto {
   @IsInt()
   @Min(1)
   @Max(50)
-  pageSize = 10;
+  limit = 10;
+
+  @ApiPropertyOptional({ enum: LeadSortBy, default: LeadSortBy.CREATED_AT })
+  @IsOptional()
+  @IsEnum(LeadSortBy)
+  sortBy: LeadSortBy = LeadSortBy.CREATED_AT;
+
+  @ApiPropertyOptional({ enum: LeadSortOrder, default: LeadSortOrder.DESC })
+  @IsOptional()
+  @IsEnum(LeadSortOrder)
+  sort: LeadSortOrder = LeadSortOrder.DESC;
 }

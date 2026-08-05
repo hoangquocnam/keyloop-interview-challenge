@@ -1,12 +1,17 @@
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+
 -- CreateEnum
 CREATE TYPE "UserRole" AS ENUM ('SALES', 'MANAGER');
 
 -- CreateEnum
 CREATE TYPE "LeadStatus" AS ENUM ('NEW', 'CONTACTED', 'QUALIFIED', 'WON', 'LOST');
 
+-- CreateEnum
+CREATE TYPE "LeadSource" AS ENUM ('website_form', 'phone_inbound', 'walk_in');
+
 -- CreateTable
 CREATE TABLE "User" (
-    "id" TEXT NOT NULL,
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "email" TEXT NOT NULL,
     "passwordHash" TEXT NOT NULL,
     "fullName" TEXT NOT NULL,
@@ -19,15 +24,15 @@ CREATE TABLE "User" (
 
 -- CreateTable
 CREATE TABLE "Lead" (
-    "id" TEXT NOT NULL,
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "firstName" TEXT NOT NULL,
     "lastName" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "phone" TEXT,
     "message" TEXT,
-    "source" TEXT NOT NULL DEFAULT 'website',
+    "source" "LeadSource" NOT NULL DEFAULT 'website_form',
     "status" "LeadStatus" NOT NULL DEFAULT 'NEW',
-    "assignedToId" TEXT,
+    "assignedToId" UUID,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -36,9 +41,9 @@ CREATE TABLE "Lead" (
 
 -- CreateTable
 CREATE TABLE "LeadActivity" (
-    "id" TEXT NOT NULL,
-    "leadId" TEXT NOT NULL,
-    "userId" TEXT NOT NULL,
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "leadId" UUID NOT NULL,
+    "userId" UUID NOT NULL,
     "type" TEXT NOT NULL,
     "note" TEXT NOT NULL,
     "happenedAt" TIMESTAMP(3) NOT NULL,

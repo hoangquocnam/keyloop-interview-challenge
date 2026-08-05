@@ -6,7 +6,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
-import { LeadInboxResponseDto } from './dto/lead-inbox-response.dto';
+import { LeadInboxDataDto } from './dto/lead-inbox-response.dto';
 import { ListLeadsQueryDto } from './dto/list-leads-query.dto';
 import { LeadsService } from './leads.service';
 
@@ -22,8 +22,8 @@ export class LeadsController {
     summary:
       'Return the lead inbox dataset with search, filter, and pagination support',
   })
-  @ApiOkResponse({ type: LeadInboxResponseDto })
-  listLeads(@Query() query: ListLeadsQueryDto): Promise<LeadInboxResponseDto> {
+  @ApiOkResponse({ type: LeadInboxDataDto })
+  listLeads(@Query() query: ListLeadsQueryDto): Promise<LeadInboxDataDto> {
     return this.leadsService.listLeads(query);
   }
 }

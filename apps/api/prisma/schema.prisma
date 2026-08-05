@@ -20,8 +20,14 @@ enum LeadStatus {
   LOST
 }
 
+enum LeadSource {
+  website_form
+  phone_inbound
+  walk_in
+}
+
 model User {
-  id           String         @id @default(cuid())
+  id           String         @id @default(uuid()) @db.Uuid
   email        String         @unique
   passwordHash String
   fullName     String
@@ -33,15 +39,15 @@ model User {
 }
 
 model Lead {
-  id                 String         @id @default(cuid())
+  id                 String         @id @default(uuid()) @db.Uuid
   firstName          String
   lastName           String
   email              String
   phone              String?
   message            String?
-  source             String         @default("website")
+  source             LeadSource     @default(website_form)
   status             LeadStatus     @default(NEW)
-  assignedToId       String?
+  assignedToId       String?        @db.Uuid
   assignedTo         User?          @relation("AssignedSalesperson", fields: [assignedToId], references: [id], onDelete: SetNull)
   createdAt          DateTime       @default(now())
   updatedAt          DateTime       @updatedAt
@@ -53,9 +59,9 @@ model Lead {
 }
 
 model LeadActivity {
-  id         String   @id @default(cuid())
-  leadId     String
-  userId     String
+  id         String   @id @default(uuid()) @db.Uuid
+  leadId     String   @db.Uuid
+  userId     String   @db.Uuid
   type       String
   note       String
   happenedAt DateTime

@@ -1,8 +1,8 @@
 import { LeadStatus, Prisma } from '@prisma/client';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { LeadInboxResponseDto } from './dto/lead-inbox-response.dto';
-import { ListLeadsQueryDto } from './dto/list-leads-query.dto';
+import { LeadInboxDataDto } from './dto/lead-inbox-response.dto';
+import { LeadSortBy, type ListLeadsQueryDto } from './dto/list-leads-query.dto';
 
 const inboxStatuses = [
   LeadStatus.NEW,
@@ -30,18 +30,19 @@ const statusLabelMap: Record<LeadStatus, string> = {
 export class LeadsService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async listLeads(query: ListLeadsQueryDto): Promise<LeadInboxResponseDto> {
+  async listLeads(query: ListLeadsQueryDto): Promise<LeadInboxDataDto> {
     const page = query.page ?? 1;
-    const pageSize = query.pageSize ?? 10;
-    const skip = (page - 1) * pageSize;
+    const limit = query.limit ?? 10;
+    const skip = (page - 1) * limit;
+    const orderBy = this.buildOrderBy(query);
     const where = this.buildWhereClause(query);
 
     const [items, total] = await this.prismaService.$transaction([
       this.prismaService.lead.findMany({
         where,
-        orderBy: [{ createdAt: 'desc' }, { updatedAt: 'desc' }],
+        orderBy,
         skip,
-        take: pageSize,
+        take: limit,
         include: {
           assignedTo: {
             select: {
@@ -62,13 +63,9 @@ export class LeadsService {
       this.prismaService.lead.count({ where }),
     ]);
 
-    const totalPages = Math.max(1, Math.ceil(total / pageSize));
-    const startEntry = total === 0 ? 0 : skip + 1;
-    const endEntry = total === 0 ? 0 : Math.min(skip + items.length, total);
+    const totalPages = Math.max(1, Math.ceil(total / limit));
 
     return {
-      title: 'Leads Inbox',
-      summary: `${total} total leads requiring attention`,
       items: items.map((item) => {
         const latestActivity = item.followUpActivities[0];
 
@@ -97,28 +94,19 @@ export class LeadsService {
           hasUnreadIndicator: item.status === LeadStatus.NEW,
         };
       }),
-      pagination: {
-        page,
-        pageSize,
-        total,
-        totalPages,
-        summaryLabel: `Showing ${startEntry} to ${endEntry} of ${total} entries`,
-      },
+      totalPage: totalPages,
+      totalCount: total,
     };
   }
 
   private buildWhereClause(query: ListLeadsQueryDto): Prisma.LeadWhereInput {
     const search = query.search?.trim();
-    const source = query.source?.trim();
 
     return {
       status: query.status ? query.status : { in: inboxStatuses },
-      ...(source
+      ...(query.source
         ? {
-            source: {
-              equals: source,
-              mode: Prisma.QueryMode.insensitive,
-            },
+            source: query.source,
           }
         : {}),
       ...(search
@@ -152,6 +140,26 @@ export class LeadsService {
           }
         : {}),
     };
+  }
+
+  private buildOrderBy(
+    query: ListLeadsQueryDto,
+  ): Prisma.LeadOrderByWithRelationInput[] {
+    switch (query.sortBy) {
+      case LeadSortBy.CUSTOMER_NAME:
+        return [
+          { firstName: query.sort },
+          { lastName: query.sort },
+          { createdAt: 'desc' },
+        ];
+      case LeadSortBy.SOURCE:
+        return [{ source: query.sort }, { createdAt: 'desc' }];
+      case LeadSortBy.STATUS:
+        return [{ status: query.sort }, { createdAt: 'desc' }];
+      case LeadSortBy.CREATED_AT:
+      default:
+        return [{ createdAt: query.sort }, { updatedAt: query.sort }];
+    }
   }
 
   private toInitials(fullName: string): string {

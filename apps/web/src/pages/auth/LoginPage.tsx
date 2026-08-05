@@ -18,7 +18,6 @@ import { loginSchema } from "../../constants/validations/auth.ts";
 import type { LoginFormValues } from "../../constants/validations/auth.ts";
 import {
   BORDERS,
-  COLORS,
   SHADOW,
   SPACING,
   FONT,
@@ -63,30 +62,28 @@ export const LoginPage = observer(() => {
       <View
         as="main"
         alignItems="center"
-        backgroundColor={COLORS.white}
+        backgroundColor="white"
         justifyContent="center"
         minHeight="100vh"
-        px={SPACING.lg}
-        py={SPACING.xl}
+        px="lg"
+        py="xl"
       >
         <View maxWidth={560} width="100%">
-          <View flexDirection="column" gap={SPACING.xxl} width="100%">
-            <View alignItems="center" flexDirection="column" gap={SPACING.xxs}>
+          <View flexDirection="column" gap="xxl" width="100%">
+            <View alignItems="center" flexDirection="column" gap="xxs">
               <Text
                 as="h1"
+                lineHeight={FONT.lineHeightHeading}
                 m={0}
                 variant="large"
                 fontSize={48}
                 weight={FONT.fontWeightBold}
-                style={{
-                  lineHeight: FONT.lineHeightHeading,
-                }}
               >
                 LeadStream
               </Text>
               <Text
                 as="span"
-                color={COLORS.textSecondary}
+                color="textSecondary"
                 fontSize={FONT.fontSizeXl}
                 textAlign="center"
                 variant="large"
@@ -107,7 +104,7 @@ export const LoginPage = observer(() => {
                 width: "100%",
               }}
             >
-              <View flexDirection="column" gap={SPACING.lg}>
+              <View flexDirection="column" gap="lg">
                 {credentialErrorMessage ? (
                   <Alert
                     description={null}
@@ -146,16 +143,13 @@ export const LoginPage = observer(() => {
 
                   <Button
                     htmlType="submit"
-                    size="large"
                     block
+                    borderRadius={BORDERS.radiusXs}
+                    fontSize={FONT.fontSizeLg}
+                    fontWeight={FONT.fontWeightBold}
                     loading={isSubmitting || auth.isLoggingIn}
-                    style={{
-                      borderRadius: BORDERS.radiusXs,
-                      fontSize: FONT.fontSizeLg,
-                      fontWeight: FONT.fontWeightBold,
-                      height: 44,
-                      marginTop: SPACING.xs,
-                    }}
+                    mt="xs"
+                    size="lg"
                     variant="primary"
                   >
                     Sign In
@@ -166,7 +160,7 @@ export const LoginPage = observer(() => {
 
                 <Text
                   as="span"
-                  color={COLORS.textSecondary}
+                  color="textSecondary"
                   fontSize={FONT.fontSizeLg}
                   textAlign="center"
                 >

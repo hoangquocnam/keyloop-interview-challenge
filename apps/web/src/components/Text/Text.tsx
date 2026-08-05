@@ -1,26 +1,34 @@
 import type { CSSProperties, ElementType, ReactNode } from 'react'
 import { FONT } from '../../theme/design-tokens.ts'
+import {
+  type TokenColorValue,
+  type TokenSpacingValue,
+  resolveColorToken,
+  resolveSpacingToken,
+} from '../../theme/token-style.ts'
 
 type TextVariant = 'small' | 'medium' | 'large'
 
 type TextProps = {
-  readonly as?: ElementType
-  readonly children: ReactNode
-  readonly className?: string
-  readonly color?: CSSProperties['color']
-  readonly fontSize?: CSSProperties['fontSize']
-  readonly height?: CSSProperties['height']
-  readonly m?: CSSProperties['margin']
-  readonly mb?: CSSProperties['marginBottom']
-  readonly ml?: CSSProperties['marginLeft']
-  readonly mr?: CSSProperties['marginRight']
-  readonly mt?: CSSProperties['marginTop']
-  readonly p?: CSSProperties['padding']
-  readonly style?: CSSProperties
-  readonly textAlign?: CSSProperties['textAlign']
-  readonly variant?: TextVariant
-  readonly weight?: CSSProperties['fontWeight']
-  readonly width?: CSSProperties['width']
+  as?: ElementType
+  children: ReactNode
+  className?: string
+  color?: TokenColorValue
+  fontSize?: CSSProperties['fontSize']
+  height?: CSSProperties['height']
+  letterSpacing?: CSSProperties['letterSpacing']
+  lineHeight?: CSSProperties['lineHeight']
+  m?: TokenSpacingValue
+  mb?: TokenSpacingValue
+  ml?: TokenSpacingValue
+  mr?: TokenSpacingValue
+  mt?: TokenSpacingValue
+  p?: TokenSpacingValue
+  style?: CSSProperties
+  textAlign?: CSSProperties['textAlign']
+  variant?: TextVariant
+  weight?: CSSProperties['fontWeight']
+  width?: CSSProperties['width']
 }
 
 const variantStyles: Record<TextVariant, CSSProperties> = {
@@ -48,6 +56,8 @@ export const Text = ({
   color,
   fontSize,
   height,
+  letterSpacing,
+  lineHeight,
   m,
   mb,
   ml,
@@ -65,16 +75,18 @@ export const Text = ({
       className={className}
       style={{
         ...variantStyles[variant],
-        color,
+        color: resolveColorToken(color),
         fontSize,
         fontFamily: FONT.fontFamily,
         height,
-        margin: m,
-        marginBottom: mb,
-        marginLeft: ml,
-        marginRight: mr,
-        marginTop: mt,
-        padding: p,
+        letterSpacing,
+        lineHeight: lineHeight ?? variantStyles[variant].lineHeight,
+        margin: resolveSpacingToken(m),
+        marginBottom: resolveSpacingToken(mb),
+        marginLeft: resolveSpacingToken(ml),
+        marginRight: resolveSpacingToken(mr),
+        marginTop: resolveSpacingToken(mt),
+        padding: resolveSpacingToken(p),
         textAlign,
         width,
         fontWeight: weight ?? variantStyles[variant].fontWeight,

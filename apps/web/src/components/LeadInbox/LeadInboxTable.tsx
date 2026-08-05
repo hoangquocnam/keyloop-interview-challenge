@@ -1,202 +1,237 @@
-import { Avatar, Checkbox } from 'antd'
-import { LeftOutlined, RightOutlined } from '@ant-design/icons'
-import { Button } from '../Button'
-import type { LeadInboxRow } from '../../constants/mocks.ts'
-import { Text } from '../Text/index.ts'
-import { View } from '../View/index.ts'
-import {
-  BORDERS,
-  COLORS,
-  FONT,
-  SHADOW,
-  SPACING,
-} from '../../theme/design-tokens.ts'
-import { LeadStatusBadge } from './LeadStatusBadge.tsx'
+import { Avatar, Checkbox, Spin, Table } from "antd";
+import type { TableColumnsType } from "antd";
+import { useEffect, useMemo, useRef } from "react";
+import { Text } from "../Text/index.ts";
+import { View } from "../View/index.ts";
+import { getLeadSourceDisplayLabel } from "../../enums/lead.ts";
+import type { LeadInboxItem } from "../../services/lead.types.ts";
+import { COLORS, FONT } from "../../theme/design-tokens.ts";
+import { LeadStatusBadge } from "./LeadStatusBadge.tsx";
 
-const tableTemplateColumns =
-  '40px minmax(138px, 1.2fr) minmax(170px, 1.3fr) minmax(112px, 0.9fr) minmax(108px, 0.9fr) minmax(130px, 1fr) minmax(126px, 1fr)'
+type Props = {
+  hasMorePages: boolean;
+  isLoading?: boolean;
+  isLoadingMore?: boolean;
+  onLoadMore: () => void;
+  onSelectLead: (leadId: string) => void;
+  rows: LeadInboxItem[];
+  selectedLeadId: string | null;
+};
 
-const columnLabels = [
-  '',
-  'CUSTOMER NAME',
-  'CONTACT INFO',
-  'SOURCE',
-  'STATUS',
-  'ASSIGNED TO',
-  'LAST ACTIVITY',
-] as const
-
-type LeadInboxTableProps = {
-  readonly currentPage: number
-  readonly pages: readonly number[]
-  readonly rows: readonly LeadInboxRow[]
-  readonly summaryLabel: string
-}
+const headerCellStyle = {
+  backgroundColor: COLORS.gray50,
+  borderBottom: `1px solid ${COLORS.border}`,
+  color: COLORS.textSecondary,
+  fontSize: 11,
+  fontWeight: FONT.fontWeightBold,
+  letterSpacing: 0.4,
+};
 
 export const LeadInboxTable = ({
-  currentPage,
-  pages,
+  hasMorePages,
+  isLoading = false,
+  isLoadingMore = false,
+  onLoadMore,
+  onSelectLead,
   rows,
-  summaryLabel,
-}: LeadInboxTableProps) => {
+  selectedLeadId,
+}: Props) => {
+  const tableWrapperRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const tableBody = tableWrapperRef.current?.querySelector(".ant-table-body");
+
+    if (!(tableBody instanceof HTMLDivElement)) {
+      return;
+    }
+
+    const handleScroll = () => {
+      const reachedBottom =
+        tableBody.scrollTop + tableBody.clientHeight >= tableBody.scrollHeight - 88;
+
+      if (reachedBottom && hasMorePages && !isLoadingMore) {
+        onLoadMore();
+      }
+    };
+
+    tableBody.addEventListener("scroll", handleScroll);
+
+    return () => {
+      tableBody.removeEventListener("scroll", handleScroll);
+    };
+  }, [hasMorePages, isLoadingMore, onLoadMore]);
+
+  const columns = useMemo<TableColumnsType<LeadInboxItem>>(
+    () => [
+      {
+        dataIndex: "selected",
+        key: "selected",
+        onHeaderCell: () => ({
+          style: {
+            ...headerCellStyle,
+            width: 56,
+          },
+        }),
+        render: (_value, row) => <Checkbox checked={row.id === selectedLeadId} />,
+        title: <Checkbox checked={false} />,
+        width: 56,
+      },
+      {
+        dataIndex: "customerName",
+        key: "customerName",
+        onHeaderCell: () => ({
+          style: headerCellStyle,
+        }),
+        render: (value: string) => (
+          <Text fontSize={FONT.fontSizeLg} weight={FONT.fontWeightSemibold}>
+            {value}
+          </Text>
+        ),
+        title: "CUSTOMER NAME",
+        width: 280,
+      },
+      {
+        dataIndex: "contactEmail",
+        key: "contactInfo",
+        onHeaderCell: () => ({
+          style: headerCellStyle,
+        }),
+        render: (_value, row) => (
+          <View flexDirection="column" gap="xxs">
+            <Text fontSize={FONT.fontSizeLg} weight={FONT.fontWeightMedium}>
+              {row.contactEmail}
+            </Text>
+            <Text color="textSecondary" fontSize={FONT.fontSizeMd}>
+              {row.phone}
+            </Text>
+          </View>
+        ),
+        title: "CONTACT INFO",
+        width: 340,
+      },
+      {
+        dataIndex: "source",
+        key: "source",
+        onHeaderCell: () => ({
+          style: headerCellStyle,
+        }),
+        render: (value: LeadInboxItem["source"]) => (
+          <Text fontSize={FONT.fontSizeLg}>{getLeadSourceDisplayLabel(value)}</Text>
+        ),
+        title: "SOURCE",
+        width: 220,
+      },
+      {
+        dataIndex: "status",
+        key: "status",
+        onHeaderCell: () => ({
+          style: headerCellStyle,
+        }),
+        render: (_value, row) => (
+          <LeadStatusBadge label={row.status.label} tone={row.status.tone} />
+        ),
+        title: "STATUS",
+        width: 180,
+      },
+      {
+        dataIndex: "assignedTo",
+        key: "assignedTo",
+        onHeaderCell: () => ({
+          style: headerCellStyle,
+        }),
+        render: (_value, row) => (
+          <View alignItems="center" flexDirection="row" gap="xs">
+            {row.assignedTo ? (
+              <>
+                <Avatar
+                  size={36}
+                  style={{
+                    backgroundColor: COLORS.gray700,
+                    color: COLORS.white,
+                    fontSize: FONT.fontSizeSm,
+                    fontWeight: FONT.fontWeightBold,
+                  }}
+                >
+                  {row.assignedTo.initials}
+                </Avatar>
+                <Text fontSize={FONT.fontSizeLg}>{row.assignedTo.fullName}</Text>
+              </>
+            ) : (
+              <Text color="textSecondary" fontSize={FONT.fontSizeLg}>
+                Unassigned
+              </Text>
+            )}
+          </View>
+        ),
+        title: "ASSIGNED TO",
+        width: 260,
+      },
+      {
+        dataIndex: "lastActivity",
+        key: "lastActivity",
+        onHeaderCell: () => ({
+          style: headerCellStyle,
+        }),
+        render: (value: string) => (
+          <Text color="textSecondary" fontSize={FONT.fontSizeLg}>
+            {value}
+          </Text>
+        ),
+        title: "LAST ACTIVITY",
+        width: 240,
+      },
+    ],
+    [selectedLeadId],
+  );
+
   return (
     <View
-      backgroundColor={COLORS.surface}
-      borderColor={COLORS.borderSecondary}
-      borderRadius={BORDERS.radiusMd}
+      backgroundColor="surface"
+      borderColor="border"
+      borderRadius={2}
       borderStyle="solid"
       borderWidth={1}
-      boxShadow={SHADOW.card}
       overflow="hidden"
       width="100%"
     >
-      <View overflow="auto">
-        <View minWidth={860}>
-          <View
-            alignItems="center"
-            backgroundColor={COLORS.gray50}
-            borderBottom={`1px solid ${COLORS.borderSecondary}`}
-            display="grid"
-            px={SPACING.sm}
-            py={SPACING.xs}
-            style={{ gridTemplateColumns: tableTemplateColumns }}
-          >
-            {columnLabels.map((label, index) => (
-              <View key={label || `col-${index}`} px={6}>
-                {index === 0 ? (
-                  <Checkbox checked={false} />
-                ) : (
-                  <Text
-                    color={COLORS.textSecondary}
-                    fontSize={11}
-                    style={{ letterSpacing: 0.4 }}
-                    weight={FONT.fontWeightBold}
-                  >
-                    {label}
-                  </Text>
-                )}
-              </View>
-            ))}
-          </View>
+      <div ref={tableWrapperRef} style={{ width: "100%" }}>
+        <Table<LeadInboxItem>
+          columns={columns}
+          dataSource={rows}
+          
+          loading={isLoading}
+          onRow={(row) => {
+            const isSelected = row.id === selectedLeadId;
 
-          {rows.map((row) => (
-            <View
-              key={row.id}
-              alignItems="center"
-              backgroundColor={row.isSelected ? COLORS.gray50 : COLORS.white}
-              borderBottom={`1px solid ${COLORS.borderSecondary}`}
-              display="grid"
-              px={SPACING.sm}
-              py={SPACING.sm}
-              style={{
-                borderLeft: row.isSelected
-                  ? `3px solid ${COLORS.info}`
-                  : '3px solid transparent',
-                gridTemplateColumns: tableTemplateColumns,
-              }}
-            >
-              <View px={6}>
-                <Checkbox checked={row.isSelected} />
-              </View>
+            return {
+              onClick: () => onSelectLead(row.id),
+              style: {
+                backgroundColor: isSelected ? COLORS.gray50 : COLORS.white,
+                boxShadow: isSelected ? `inset 3px 0 0 ${COLORS.info}` : undefined,
+                cursor: "pointer",
+              },
+            };
+          }}
+          pagination={false}
+          rowKey="id"
+          scroll={{ x: 1540, y: 580 }}
+          style={{ width: "100%" }}
+        />
+      </div>
 
-              <View alignItems="center" flexDirection="row" gap={6} px={6}>
-                <View
-                  backgroundColor={row.hasUnreadIndicator ? '#3b82f6' : 'transparent'}
-                  borderRadius={BORDERS.radiusPill}
-                  height={8}
-                  width={8}
-                />
-                <Text fontSize={FONT.fontSizeMd} weight={FONT.fontWeightSemibold}>
-                  {row.customerName}
-                </Text>
-              </View>
-
-              <View flexDirection="column" px={6}>
-                <Text fontSize={FONT.fontSizeMd} weight={FONT.fontWeightMedium}>
-                  {row.contactEmail}
-                </Text>
-                <Text color={COLORS.textSecondary} fontSize={FONT.fontSizeMd}>
-                  {row.phone}
-                </Text>
-              </View>
-
-              <View px={6}>
-                <Text fontSize={FONT.fontSizeMd}>{row.source}</Text>
-              </View>
-
-              <View px={6}>
-                <LeadStatusBadge label={row.statusLabel} tone={row.statusTone} />
-              </View>
-
-              <View alignItems="center" flexDirection="row" gap={SPACING.xs} px={6}>
-                {row.assignedTo ? (
-                  <>
-                    <Avatar
-                      size={28}
-                      style={{
-                        backgroundColor: '#5b6474',
-                        color: COLORS.white,
-                        fontSize: FONT.fontSizeXs,
-                        fontWeight: FONT.fontWeightBold,
-                      }}
-                    >
-                      {row.assignedTo.initials}
-                    </Avatar>
-                    <Text
-                      fontSize={FONT.fontSizeMd}
-                      style={{ whiteSpace: 'nowrap' }}
-                    >
-                      {row.assignedTo.fullName}
-                    </Text>
-                  </>
-                ) : (
-                  <Text color={COLORS.textSecondary} fontSize={FONT.fontSizeMd}>
-                    Unassigned
-                  </Text>
-                )}
-              </View>
-
-              <View px={6}>
-                <Text color={COLORS.textSecondary} fontSize={FONT.fontSizeMd}>
-                  {row.lastActivity}
-                </Text>
-              </View>
-            </View>
-          ))}
+      {isLoadingMore ? (
+        <View
+          alignItems="center"
+          borderColor="border"
+          borderTopStyle="solid"
+          borderTopWidth={1}
+          justifyContent="center"
+          minHeight={52}
+          width="100%"
+        >
+          <Spin size="small" />
         </View>
-      </View>
-
-      <View
-        alignItems="center"
-        justifyContent="space-between"
-        px={SPACING.sm}
-        py={SPACING.sm}
-      >
-        <Text color={COLORS.textSecondary} fontSize={FONT.fontSizeMd}>
-          {summaryLabel}
-        </Text>
-
-        <View alignItems="center" flexDirection="row" gap={6}>
-          <Button icon={<LeftOutlined />} size="middle" variant="outline" />
-          {pages.map((page) => (
-            <Button
-              key={page}
-              size="middle"
-              style={{
-                borderColor: COLORS.border,
-                minWidth: 34,
-              }}
-              variant={page === currentPage ? 'primary' : 'outline'}
-            >
-              {page}
-            </Button>
-          ))}
-          <Button disabled size="middle" variant="outline">
-            ...
-          </Button>
-          <Button icon={<RightOutlined />} size="middle" variant="outline" />
-        </View>
-      </View>
+      ) : null}
     </View>
-  )
-}
+  );
+};

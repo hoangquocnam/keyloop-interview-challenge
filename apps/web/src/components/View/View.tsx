@@ -4,62 +4,76 @@ import type {
   ElementType,
   ReactNode,
 } from "react";
+import {
+  type TokenBorderValue,
+  type TokenColorValue,
+  type TokenShadowValue,
+  type TokenSpacingValue,
+  resolveBorderToken,
+  resolveColorToken,
+  resolveShadowToken,
+  resolveSpacingToken,
+} from "../../theme/token-style.ts";
 
 type ViewOwnProps<T extends ElementType = "div"> = {
-  readonly alignItems?: CSSProperties["alignItems"];
-  readonly as?: T;
-  readonly backgroundColor?: CSSProperties["backgroundColor"];
-  readonly borderColor?: CSSProperties["borderColor"];
-  readonly borderRadius?: CSSProperties["borderRadius"];
-  readonly borderBottomStyle?: CSSProperties["borderBottomStyle"];
-  readonly borderBottomWidth?: CSSProperties["borderBottomWidth"];
-  readonly borderRightStyle?: CSSProperties["borderRightStyle"];
-  readonly borderRightWidth?: CSSProperties["borderRightWidth"];
-  readonly borderStyle?: CSSProperties["borderStyle"];
-  readonly borderTopStyle?: CSSProperties["borderTopStyle"];
-  readonly borderTopWidth?: CSSProperties["borderTopWidth"];
-  readonly borderWidth?: CSSProperties["borderWidth"];
-  readonly bottom?: CSSProperties["bottom"];
-  readonly boxShadow?: CSSProperties["boxShadow"];
-  readonly children?: ReactNode;
-  readonly className?: string;
-  readonly columnGap?: CSSProperties["columnGap"];
-  readonly display?: CSSProperties["display"];
-  readonly flex?: CSSProperties["flex"];
-  readonly flexBasis?: CSSProperties["flexBasis"];
-  readonly flexDirection?: CSSProperties["flexDirection"];
-  readonly flexGrow?: CSSProperties["flexGrow"];
-  readonly flexShrink?: CSSProperties["flexShrink"];
-  readonly flexWrap?: CSSProperties["flexWrap"];
-  readonly gap?: CSSProperties["gap"];
-  readonly height?: CSSProperties["height"];
-  readonly justifyContent?: CSSProperties["justifyContent"];
-  readonly left?: CSSProperties["left"];
-  readonly m?: CSSProperties["margin"];
-  readonly mb?: CSSProperties["marginBottom"];
-  readonly ml?: CSSProperties["marginLeft"];
-  readonly mr?: CSSProperties["marginRight"];
-  readonly mt?: CSSProperties["marginTop"];
-  readonly mx?: CSSProperties["marginLeft"];
-  readonly my?: CSSProperties["marginTop"];
-  readonly maxHeight?: CSSProperties["maxHeight"];
-  readonly maxWidth?: CSSProperties["maxWidth"];
-  readonly minHeight?: CSSProperties["minHeight"];
-  readonly minWidth?: CSSProperties["minWidth"];
-  readonly overflow?: CSSProperties["overflow"];
-  readonly p?: CSSProperties["padding"];
-  readonly pb?: CSSProperties["paddingBottom"];
-  readonly pl?: CSSProperties["paddingLeft"];
-  readonly pr?: CSSProperties["paddingRight"];
-  readonly position?: CSSProperties["position"];
-  readonly pt?: CSSProperties["paddingTop"];
-  readonly px?: CSSProperties["paddingLeft"];
-  readonly py?: CSSProperties["paddingTop"];
-  readonly right?: CSSProperties["right"];
-  readonly rowGap?: CSSProperties["rowGap"];
-  readonly style?: CSSProperties;
-  readonly top?: CSSProperties["top"];
-  readonly width?: CSSProperties["width"];
+  alignItems?: CSSProperties["alignItems"];
+  as?: T;
+  backgroundColor?: TokenColorValue;
+  borderColor?: TokenColorValue;
+  borderRadius?: TokenBorderValue;
+  borderBottomStyle?: CSSProperties["borderBottomStyle"];
+  borderBottomWidth?: CSSProperties["borderBottomWidth"];
+  borderRightStyle?: CSSProperties["borderRightStyle"];
+  borderRightWidth?: CSSProperties["borderRightWidth"];
+  borderStyle?: CSSProperties["borderStyle"];
+  borderTopStyle?: CSSProperties["borderTopStyle"];
+  borderTopWidth?: CSSProperties["borderTopWidth"];
+  borderWidth?: CSSProperties["borderWidth"];
+  border?: CSSProperties["border"];
+  bottom?: CSSProperties["bottom"];
+  boxShadow?: TokenShadowValue;
+  children?: ReactNode;
+  className?: string;
+  columnGap?: TokenSpacingValue;
+  cursor?: CSSProperties["cursor"];
+  display?: CSSProperties["display"];
+  flex?: CSSProperties["flex"];
+  flexBasis?: CSSProperties["flexBasis"];
+  flexDirection?: CSSProperties["flexDirection"];
+  flexGrow?: CSSProperties["flexGrow"];
+  flexShrink?: CSSProperties["flexShrink"];
+  flexWrap?: CSSProperties["flexWrap"];
+  gap?: TokenSpacingValue;
+  gridTemplateColumns?: CSSProperties["gridTemplateColumns"];
+  gridTemplateRows?: CSSProperties["gridTemplateRows"];
+  height?: CSSProperties["height"];
+  justifyContent?: CSSProperties["justifyContent"];
+  left?: CSSProperties["left"];
+  m?: TokenSpacingValue;
+  mb?: TokenSpacingValue;
+  ml?: TokenSpacingValue;
+  mr?: TokenSpacingValue;
+  mt?: TokenSpacingValue;
+  mx?: TokenSpacingValue;
+  my?: TokenSpacingValue;
+  maxHeight?: CSSProperties["maxHeight"];
+  maxWidth?: CSSProperties["maxWidth"];
+  minHeight?: CSSProperties["minHeight"];
+  minWidth?: CSSProperties["minWidth"];
+  overflow?: CSSProperties["overflow"];
+  p?: TokenSpacingValue;
+  pb?: TokenSpacingValue;
+  pl?: TokenSpacingValue;
+  pr?: TokenSpacingValue;
+  position?: CSSProperties["position"];
+  pt?: TokenSpacingValue;
+  px?: TokenSpacingValue;
+  py?: TokenSpacingValue;
+  right?: CSSProperties["right"];
+  rowGap?: TokenSpacingValue;
+  style?: CSSProperties;
+  top?: CSSProperties["top"];
+  width?: CSSProperties["width"];
 };
 
 type ViewProps<T extends ElementType = "div"> = ViewOwnProps<T> &
@@ -79,11 +93,13 @@ export const View = <T extends ElementType = "div">({
   borderTopStyle,
   borderTopWidth,
   borderWidth,
+  border,
   bottom,
   boxShadow,
   children,
   className,
   columnGap,
+  cursor,
   display,
   flex,
   flexBasis,
@@ -92,6 +108,8 @@ export const View = <T extends ElementType = "div">({
   flexShrink,
   flexWrap,
   gap,
+  gridTemplateColumns,
+  gridTemplateRows,
   height,
   justifyContent,
   left,
@@ -141,9 +159,9 @@ export const View = <T extends ElementType = "div">({
       className={className}
       style={{
         alignItems,
-        backgroundColor,
-        borderColor,
-        borderRadius,
+        backgroundColor: resolveColorToken(backgroundColor),
+        borderColor: resolveColorToken(borderColor),
+        borderRadius: resolveBorderToken(borderRadius),
         borderBottomStyle,
         borderBottomWidth,
         borderRightStyle,
@@ -152,9 +170,11 @@ export const View = <T extends ElementType = "div">({
         borderTopStyle,
         borderTopWidth,
         borderWidth,
+        border,
         bottom,
-        boxShadow,
-        columnGap,
+        boxShadow: resolveShadowToken(boxShadow),
+        columnGap: resolveSpacingToken(columnGap),
+        cursor,
         display: resolvedDisplay,
         flex,
         flexBasis,
@@ -162,28 +182,30 @@ export const View = <T extends ElementType = "div">({
         flexGrow,
         flexShrink,
         flexWrap,
-        gap,
+        gap: resolveSpacingToken(gap),
+        gridTemplateColumns,
+        gridTemplateRows,
         height,
         justifyContent,
         left,
-        margin: m,
-        marginBottom: mb ?? my,
-        marginLeft: ml ?? mx,
-        marginRight: mr ?? mx,
-        marginTop: mt ?? my,
+        margin: resolveSpacingToken(m),
+        marginBottom: resolveSpacingToken(mb ?? my),
+        marginLeft: resolveSpacingToken(ml ?? mx),
+        marginRight: resolveSpacingToken(mr ?? mx),
+        marginTop: resolveSpacingToken(mt ?? my),
         maxHeight,
         maxWidth,
         minHeight,
         minWidth,
         overflow,
-        padding: p,
-        paddingBottom: pb ?? py,
-        paddingLeft: pl ?? px,
-        paddingRight: pr ?? px,
-        paddingTop: pt ?? py,
+        padding: resolveSpacingToken(p),
+        paddingBottom: resolveSpacingToken(pb ?? py),
+        paddingLeft: resolveSpacingToken(pl ?? px),
+        paddingRight: resolveSpacingToken(pr ?? px),
+        paddingTop: resolveSpacingToken(pt ?? py),
         position,
         right,
-        rowGap,
+        rowGap: resolveSpacingToken(rowGap),
         top,
         width,
         ...style,

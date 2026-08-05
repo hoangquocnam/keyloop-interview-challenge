@@ -36,6 +36,42 @@ export const COLORS = {
   borderSecondary: '#f0f0f0',
   success: '#52c41a',
   error: '#ff4d4f',
+  error_50: '#fff1f0',
+  error_100: '#ffccc7',
+  error_200: '#ffa39e',
+  error_300: '#ff7875',
+  error_400: '#ff4d4f',
+  error_500: '#f5222d',
+  error_600: '#cf1322',
+  error_700: '#a8071a',
+  error_800: '#820014',
+  error_900: '#5c0011',
+  warning_50: '#fffbe6',
+  warning_100: '#fff1b8',
+  warning_200: '#ffe58f',
+  warning_300: '#ffd666',
+  warning_400: '#ffc53d',
+  warning_500: '#faad14',
+  warning_600: '#d48806',
+  warning_700: '#ad6800',
+  warning_800: '#874d00',
+  warning_900: '#613400',
+  info_50: '#e6f7ff',
+  info_100: '#bae7ff',
+  info_200: '#91d5ff',
+  info_300: '#69c0ff',
+  info_400: '#40a9ff',
+  info_500: '#1677ff',
+  info_600: '#0958d9',
+  info_700: '#003a8c',
+  info_800: '#002766',
+  info_900: '#001d4d',
+  success_50: '#f6ffed',
+  success_100: '#d9f7be',
+  success_200: '#b7eb8f',
+  success_300: '#95de64',
+  success_400: '#73d13d',
+  success_500: '#52c41a',   
   warning: '#faad14',
   info: '#1677ff',
 } as const
@@ -67,6 +103,12 @@ export const SHADOW = {
   card: '0 8px 24px rgba(20, 20, 20, 0.04)',
   dropdown: '0 12px 32px rgba(20, 20, 20, 0.08)',
 } as const
+
+export type FontToken = keyof typeof FONT
+export type ColorToken = keyof typeof COLORS
+export type SpacingToken = keyof typeof SPACING
+export type BorderToken = keyof typeof BORDERS
+export type ShadowToken = keyof typeof SHADOW
 
 export const designTokens = {
   typography: FONT,

@@ -1,4 +1,4 @@
-import { LeadStatus } from '@prisma/client';
+import { LeadSource, LeadStatus } from '@prisma/client';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class LeadAssigneeDto {
@@ -36,8 +36,8 @@ export class LeadInboxItemDto {
   @ApiProperty()
   phone!: string;
 
-  @ApiProperty()
-  source!: string;
+  @ApiProperty({ enum: LeadSource })
+  source!: LeadSource;
 
   @ApiProperty({ type: LeadStatusDto })
   status!: LeadStatusDto;
@@ -52,33 +52,13 @@ export class LeadInboxItemDto {
   hasUnreadIndicator!: boolean;
 }
 
-export class LeadInboxPaginationDto {
-  @ApiProperty()
-  page!: number;
-
-  @ApiProperty()
-  pageSize!: number;
-
-  @ApiProperty()
-  total!: number;
-
-  @ApiProperty()
-  totalPages!: number;
-
-  @ApiProperty()
-  summaryLabel!: string;
-}
-
-export class LeadInboxResponseDto {
-  @ApiProperty()
-  title!: string;
-
-  @ApiProperty()
-  summary!: string;
-
+export class LeadInboxDataDto {
   @ApiProperty({ type: LeadInboxItemDto, isArray: true })
   items!: LeadInboxItemDto[];
 
-  @ApiProperty({ type: LeadInboxPaginationDto })
-  pagination!: LeadInboxPaginationDto;
+  @ApiProperty()
+  totalPage!: number;
+
+  @ApiProperty()
+  totalCount!: number;
 }
