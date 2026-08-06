@@ -29,6 +29,8 @@ import {
 import { LeadInboxDataDto } from './dto/lead-inbox-response.dto';
 import { ListLeadsQueryDto } from './dto/list-leads-query.dto';
 import { UpdateLeadStatusResponseDto } from './dto/update-lead-status-response.dto';
+import { UpdateLeadAssigneeResponseDto } from './dto/update-lead-assignee-response.dto';
+import { UpdateLeadAssigneeDto } from './dto/update-lead-assignee.dto';
 import { UpdateLeadStatusDto } from './dto/update-lead-status.dto';
 import { LeadsService } from './leads.service';
 
@@ -101,6 +103,21 @@ export class LeadsController {
       leadId,
       user.sub,
       updateLeadStatusDto,
+    );
+  }
+
+  @Patch(':leadId/assignee')
+  @ApiOperation({ summary: 'Update the assignee for the specified lead' })
+  @ApiOkResponse({ type: UpdateLeadAssigneeResponseDto })
+  updateLeadAssignee(
+    @Param('leadId', new ParseUUIDPipe()) leadId: string,
+    @Body() updateLeadAssigneeDto: UpdateLeadAssigneeDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<UpdateLeadAssigneeResponseDto> {
+    return this.leadsService.updateLeadAssignee(
+      leadId,
+      user.sub,
+      updateLeadAssigneeDto,
     );
   }
 

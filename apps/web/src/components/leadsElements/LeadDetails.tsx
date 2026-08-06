@@ -1,25 +1,43 @@
 import { DeleteOutlined } from "@ant-design/icons";
-import { Avatar } from "antd";
+import { Avatar, Dropdown, Spin } from "antd";
 
 import { LeadDetailCard } from "@/components/leadsElements/LeadDetailCard.tsx";
 import { LeadDetailInfoRow } from "@/components/leadsElements/LeadDetailInfoRow.tsx";
 import { Button, Text, View } from "@/components/ui";
 import type { LeadInboxAssignee } from "@/services/lead.types.ts";
+import type { UserSummary } from "@/services/user.types.ts";
 import { COLORS, FONT } from "@/theme/design-tokens.ts";
 
 type LeadDetailsProps = {
   assignedTo: LeadInboxAssignee | null;
   createdAtLabel: string;
+  isUpdatingAssignee?: boolean;
   onDeleteClick: () => void;
+  onSelectAssignee: (assignedToId: string | null) => void;
   sourceLabel: string;
+  users: UserSummary[];
 };
 
 export const LeadDetails = ({
   assignedTo,
   createdAtLabel,
+  isUpdatingAssignee = false,
   onDeleteClick,
+  onSelectAssignee,
   sourceLabel,
+  users,
 }: LeadDetailsProps) => {
+  const assigneeMenuItems = [
+    {
+      key: "unassigned",
+      label: "Unassigned (Queue)",
+    },
+    ...users.map((user) => ({
+      key: user.id,
+      label: user.fullName,
+    })),
+  ];
+
   return (
     <LeadDetailCard title="LEAD DETAILS">
       <View backgroundColor="border" height={1} width="100%" />
@@ -29,28 +47,49 @@ export const LeadDetails = ({
         <LeadDetailInfoRow
           label="Assigned To"
           value={
-            assignedTo ? (
-              <View alignItems="center" flexDirection="row" gap="sm">
-                <Avatar
-                  size={36}
-                  style={{
-                    backgroundColor: COLORS.gray100,
-                    color: COLORS.gray700,
-                    fontSize: FONT.fontSizeSm,
-                    fontWeight: FONT.fontWeightBold,
-                  }}
-                >
-                  {assignedTo.initials}
-                </Avatar>
-                <Text fontSize={FONT.fontSizeLg} weight={FONT.fontWeightMedium}>
-                  {assignedTo.fullName}
-                </Text>
+            <Dropdown
+              menu={{
+                items: assigneeMenuItems,
+                onClick: ({ key }) => {
+                  onSelectAssignee(key === "unassigned" ? null : key);
+                },
+                selectable: true,
+                selectedKeys: [assignedTo?.id ?? "unassigned"],
+              }}
+              trigger={isUpdatingAssignee ? [] : ["click"]}
+            >
+              <View
+                alignItems="center"
+                cursor={isUpdatingAssignee ? "default" : "pointer"}
+                flexDirection="row"
+                gap="sm"
+                minHeight={36}
+              >
+                {isUpdatingAssignee ? <Spin size="small" /> : null}
+                {assignedTo ? (
+                  <>
+                    <Avatar
+                      size={36}
+                      style={{
+                        backgroundColor: COLORS.gray100,
+                        color: COLORS.gray700,
+                        fontSize: FONT.fontSizeSm,
+                        fontWeight: FONT.fontWeightBold,
+                      }}
+                    >
+                      {assignedTo.initials}
+                    </Avatar>
+                    <Text fontSize={FONT.fontSizeLg} weight={FONT.fontWeightMedium}>
+                      {assignedTo.fullName}
+                    </Text>
+                  </>
+                ) : (
+                  <Text color="textSecondary" fontSize={FONT.fontSizeLg}>
+                    Unassigned (Queue)
+                  </Text>
+                )}
               </View>
-            ) : (
-              <Text color="textSecondary" fontSize={FONT.fontSizeLg}>
-                Unassigned
-              </Text>
-            )
+            </Dropdown>
           }
         />
       </View>

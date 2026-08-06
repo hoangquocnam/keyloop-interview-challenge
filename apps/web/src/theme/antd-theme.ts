@@ -107,6 +107,14 @@ export const antdThemeConfig: ThemeConfig = {
       errorActiveShadow: '0 0 0 2px rgba(255, 77, 79, 0.12)',
       warningActiveShadow: '0 0 0 2px rgba(250, 173, 20, 0.12)',
     },
+    Select: {
+      activeBorderColor: COLORS.black,
+      hoverBorderColor: COLORS.black,
+      optionActiveBg: COLORS.gray50,
+      optionSelectedBg: COLORS.gray200,
+      optionSelectedColor: COLORS.text,
+      selectorBg: COLORS.surface,
+    },
     Table: {
       headerBg: COLORS.surfaceMuted,
       headerColor: COLORS.text,

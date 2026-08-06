@@ -157,6 +157,44 @@ export class LeadStore {
         ? [timelineItem, ...this.currentLead.timeline]
         : this.currentLead.timeline,
     };
+
+    this.items = this.items.map((item) =>
+      item.id === this.currentLead?.id
+        ? {
+            ...item,
+            status,
+          }
+        : item,
+    );
+  }
+
+  updateCurrentLeadAssignee(
+    assignedTo: LeadDetailResponse["leadDetails"]["assignedTo"],
+    timelineItem: LeadDetailTimelineItem | null,
+  ) {
+    if (!this.currentLead) {
+      return;
+    }
+
+    this.currentLead = {
+      ...this.currentLead,
+      leadDetails: {
+        ...this.currentLead.leadDetails,
+        assignedTo,
+      },
+      timeline: timelineItem
+        ? [timelineItem, ...this.currentLead.timeline]
+        : this.currentLead.timeline,
+    };
+
+    this.items = this.items.map((item) =>
+      item.id === this.currentLead?.id
+        ? {
+            ...item,
+            assignedTo,
+          }
+        : item,
+    );
   }
 
   reset() {

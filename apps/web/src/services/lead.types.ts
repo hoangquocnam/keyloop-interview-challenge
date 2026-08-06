@@ -128,6 +128,15 @@ export type UpdateLeadStatusResponse = {
   timelineItem: LeadDetailTimelineItem | null;
 };
 
+export type UpdateLeadAssigneePayload = {
+  assignedToId?: string | null;
+};
+
+export type UpdateLeadAssigneeResponse = {
+  assignedTo: LeadInboxAssignee | null;
+  timelineItem: LeadDetailTimelineItem | null;
+};
+
 export type ArchiveLeadResponse = {
   archivedAt: string;
   id: string;

@@ -34,9 +34,11 @@ import {
   type LeadStatusValue as LeadStatusValueType,
 } from "@/enums/lead.enums.ts";
 import { useLeadDetailQuery } from "@/hooks/use-lead-detail-query.ts";
+import { useUsersQuery } from "@/hooks/use-users-query.ts";
 import {
   archiveLead,
   createLeadActivity,
+  updateLeadAssignee,
   updateLeadStatus,
 } from "@/services/leads.ts";
 import {
@@ -45,6 +47,7 @@ import {
   type CreateLeadActivityPayload,
   type LeadDetailResponse,
   type LeadDetailTimelineItem,
+  type UpdateLeadAssigneePayload,
 } from "@/services/lead.types.ts";
 import { useRootStore } from "@/stores/use-root-store.ts";
 import { FONT } from "@/theme/design-tokens.ts";
@@ -131,6 +134,7 @@ export const LeadDetailPage = observer(() => {
       })),
     [],
   );
+  const usersQuery = useUsersQuery({ enabled: auth.isAuthenticated });
   const leadDetailQuery = useLeadDetailQuery({
     enabled: auth.isAuthenticated && !isArchived,
     leadId,
@@ -200,6 +204,41 @@ export const LeadDetailPage = observer(() => {
         notificationApi.info({
           description: null,
           message: "Lead status is already up to date",
+          placement: "bottomRight",
+        });
+      }
+
+      await invalidateLeadQueries();
+    },
+  });
+
+  const updateLeadAssigneeMutation = useMutation({
+    mutationFn: async (payload: UpdateLeadAssigneePayload) => {
+      return updateLeadAssignee(leadId as string, payload);
+    },
+    onError: (error: Error) => {
+      notificationApi.error({
+        description: error.message,
+        message: "Failed to update assignee",
+        placement: "bottomRight",
+      });
+    },
+    onSuccess: async (response) => {
+      lead.updateCurrentLeadAssignee(
+        response.assignedTo,
+        response.timelineItem,
+      );
+
+      if (response.timelineItem) {
+        notificationApi.success({
+          description: null,
+          message: "Assignee updated successfully",
+          placement: "bottomRight",
+        });
+      } else {
+        notificationApi.info({
+          description: null,
+          message: "Assignee is already up to date",
           placement: "bottomRight",
         });
       }
@@ -582,12 +621,23 @@ export const LeadDetailPage = observer(() => {
                   createdAtLabel={formatLeadDetailDate(
                     currentLead.leadDetails.createdAt,
                   )}
+                  isUpdatingAssignee={updateLeadAssigneeMutation.isPending}
                   onDeleteClick={() => {
                     setIsDeleteModalOpen(true);
+                  }}
+                  onSelectAssignee={(assignedToId) => {
+                    if (updateLeadAssigneeMutation.isPending) {
+                      return;
+                    }
+
+                    void updateLeadAssigneeMutation.mutateAsync({
+                      assignedToId,
+                    });
                   }}
                   sourceLabel={getLeadSourceDisplayLabel(
                     currentLead.leadDetails.source,
                   )}
+                  users={usersQuery.data ?? []}
                 />
               </View>
             </View>

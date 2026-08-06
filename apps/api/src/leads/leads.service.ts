@@ -24,6 +24,8 @@ import { ArchiveLeadResponseDto } from './dto/archive-lead-response.dto';
 import { LeadInboxDataDto } from './dto/lead-inbox-response.dto';
 import { LeadSortBy, type ListLeadsQueryDto } from './dto/list-leads-query.dto';
 import { UpdateLeadStatusResponseDto } from './dto/update-lead-status-response.dto';
+import { UpdateLeadAssigneeResponseDto } from './dto/update-lead-assignee-response.dto';
+import { UpdateLeadAssigneeDto } from './dto/update-lead-assignee.dto';
 import { UpdateLeadStatusDto } from './dto/update-lead-status.dto';
 
 const statusToneMap: Record<LeadStatus, 'neutral' | 'info' | 'success'> = {
@@ -358,6 +360,95 @@ export class LeadsService {
 
     return {
       status: this.toStatusDto(updateLeadStatusDto.status),
+      timelineItem: this.toTimelineItem(activity),
+    };
+  }
+
+  async updateLeadAssignee(
+    leadId: string,
+    userId: string,
+    updateLeadAssigneeDto: UpdateLeadAssigneeDto,
+  ): Promise<UpdateLeadAssigneeResponseDto> {
+    const lead = await this.findActiveLeadById(leadId, {
+      assignedTo: {
+        select: {
+          id: true,
+          fullName: true,
+        },
+      },
+      assignedToId: true,
+      id: true,
+    });
+
+    if (!lead) {
+      throw new NotFoundException('Lead was not found.');
+    }
+
+    const nextAssignedToId = await this.resolveAssignedToId(
+      updateLeadAssigneeDto.assignedToId,
+    );
+
+    if (lead.assignedToId === nextAssignedToId) {
+      return {
+        assignedTo: lead.assignedTo ? this.toAssigneeDto(lead.assignedTo) : null,
+        timelineItem: null,
+      };
+    }
+
+    const happenedAt = new Date();
+    const nextAssignedUser = nextAssignedToId
+      ? await this.prismaService.user.findUnique({
+          where: { id: nextAssignedToId },
+          select: { fullName: true },
+        })
+      : null;
+    const note = nextAssignedToId
+      ? `Lead assigned to ${nextAssignedUser?.fullName ?? 'the selected salesperson'}.`
+      : 'Lead moved to the unassigned queue.';
+
+    const [updatedLead, activity] = await this.prismaService.$transaction([
+      this.prismaService.lead.update({
+        where: { id: leadId },
+        data: {
+          assignedToId: nextAssignedToId,
+        },
+        select: {
+          assignedTo: {
+            select: {
+              id: true,
+              fullName: true,
+            },
+          },
+        },
+      }),
+      this.prismaService.leadActivity.create({
+        data: {
+          leadId,
+          userId,
+          type: LeadActivityType.system,
+          title: 'Assignee Updated',
+          note,
+          happenedAt,
+        },
+        select: {
+          id: true,
+          type: true,
+          title: true,
+          note: true,
+          happenedAt: true,
+          user: {
+            select: {
+              fullName: true,
+            },
+          },
+        },
+      }),
+    ]);
+
+    return {
+      assignedTo: updatedLead.assignedTo
+        ? this.toAssigneeDto(updatedLead.assignedTo)
+        : null,
       timelineItem: this.toTimelineItem(activity),
     };
   }

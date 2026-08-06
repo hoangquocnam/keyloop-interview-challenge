@@ -1,8 +1,19 @@
-import { Avatar, Spin, Table } from "antd";
+import {
+  Avatar,
+
+  Spin,
+  Table,
+} from "antd";
+import { CaretDownOutlined, CaretUpOutlined, SwapOutlined } from "@ant-design/icons";
 import type { TableColumnsType } from "antd";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Text, View } from "@/components/ui";
-import { getLeadSourceDisplayLabel } from "../../enums/lead.enums.ts";
+import {
+  getLeadSourceDisplayLabel,
+  LeadSortBy,
+  type LeadSortBy as LeadSortByValue,
+  type LeadSortOrder,
+} from "../../enums/lead.enums.ts";
 import type { LeadInboxItem } from "../../services/lead.types.ts";
 import { COLORS, FONT } from "@/theme/design-tokens.ts";
 import { LeadStatusBadge } from "./LeadStatusBadge.tsx";
@@ -13,7 +24,10 @@ type Props = {
   isLoadingMore?: boolean;
   onLoadMore: () => void;
   onSelectLead: (leadId: string) => void;
+  onSortChange: (sortBy: LeadSortByValue) => void;
   rows: LeadInboxItem[];
+  sortBy: LeadSortByValue;
+  sortOrder: LeadSortOrder;
   selectedLeadId: string | null;
 };
 
@@ -32,7 +46,10 @@ export const LeadInboxTable = ({
   isLoadingMore = false,
   onLoadMore,
   onSelectLead,
+  onSortChange,
   rows,
+  sortBy,
+  sortOrder,
   selectedLeadId,
 }: Props) => {
   const tableWrapperRef = useRef<HTMLDivElement | null>(null);
@@ -145,28 +162,66 @@ export const LeadInboxTable = ({
     };
   }, []);
 
+  const getHeaderCellProps = (nextSortBy?: LeadSortByValue) => ({
+    onClick: nextSortBy
+      ? () => {
+          onSortChange(nextSortBy);
+        }
+      : undefined,
+    style: {
+      ...headerCellStyle,
+      cursor: nextSortBy ? "pointer" : "default",
+    },
+  });
+
+  const renderSortableHeader = (
+    label: string,
+    nextSortBy: LeadSortByValue,
+  ) => {
+    const isActive = sortBy === nextSortBy;
+    const iconColor = isActive ? COLORS.text : COLORS.textTertiary;
+
+    return (
+      <View alignItems="center" flexDirection="row" gap="xs">
+        <Text
+          color={isActive ? "text" : "textSecondary"}
+          fontSize={11}
+          letterSpacing={0.4}
+          weight={FONT.fontWeightBold}
+        >
+          {label}
+        </Text>
+        {isActive ? (
+          sortOrder === "asc" ? (
+            <CaretUpOutlined style={{ color: iconColor, fontSize: 11 }} />
+          ) : (
+            <CaretDownOutlined style={{ color: iconColor, fontSize: 11 }} />
+          )
+        ) : (
+          <SwapOutlined style={{ color: iconColor, fontSize: 11 }} />
+        )}
+      </View>
+    );
+  };
+
   const columns = useMemo<TableColumnsType<LeadInboxItem>>(
     () => [
       {
         dataIndex: "customerName",
         key: "customerName",
-        onHeaderCell: () => ({
-          style: headerCellStyle,
-        }),
+        onHeaderCell: () => getHeaderCellProps(LeadSortBy.CUSTOMER_NAME),
         render: (value: string) => (
           <Text fontSize={FONT.fontSizeLg} weight={FONT.fontWeightSemibold}>
             {value}
           </Text>
         ),
-        title: "CUSTOMER NAME",
+        title: renderSortableHeader("CUSTOMER NAME", LeadSortBy.CUSTOMER_NAME),
         width: 280,
       },
       {
         dataIndex: "contactEmail",
         key: "contactInfo",
-        onHeaderCell: () => ({
-          style: headerCellStyle,
-        }),
+        onHeaderCell: () => getHeaderCellProps(),
         render: (_value, row) => (
           <View flexDirection="column" gap="xxs">
             <Text fontSize={FONT.fontSizeLg} weight={FONT.fontWeightMedium}>
@@ -183,36 +238,30 @@ export const LeadInboxTable = ({
       {
         dataIndex: "source",
         key: "source",
-        onHeaderCell: () => ({
-          style: headerCellStyle,
-        }),
+        onHeaderCell: () => getHeaderCellProps(LeadSortBy.SOURCE),
         render: (value: LeadInboxItem["source"]) => (
           <Text fontSize={FONT.fontSizeLg}>{getLeadSourceDisplayLabel(value)}</Text>
         ),
-        title: "SOURCE",
+        title: renderSortableHeader("SOURCE", LeadSortBy.SOURCE),
         width: 220,
       },
       {
         dataIndex: "status",
         key: "status",
-        onHeaderCell: () => ({
-          style: headerCellStyle,
-        }),
+        onHeaderCell: () => getHeaderCellProps(LeadSortBy.STATUS),
         render: (_value, row) => (
           <LeadStatusBadge
             label={row.status.label}
             value={row.status.value}
           />
         ),
-        title: "STATUS",
+        title: renderSortableHeader("STATUS", LeadSortBy.STATUS),
         width: 180,
       },
       {
         dataIndex: "assignedTo",
         key: "assignedTo",
-        onHeaderCell: () => ({
-          style: headerCellStyle,
-        }),
+        onHeaderCell: () => getHeaderCellProps(),
         render: (_value, row) => (
           <View alignItems="center" flexDirection="row" gap="xs">
             {row.assignedTo ? (
@@ -243,19 +292,17 @@ export const LeadInboxTable = ({
       {
         dataIndex: "lastActivity",
         key: "lastActivity",
-        onHeaderCell: () => ({
-          style: headerCellStyle,
-        }),
+        onHeaderCell: () => getHeaderCellProps(LeadSortBy.CREATED_AT),
         render: (value: string) => (
           <Text color="textSecondary" fontSize={FONT.fontSizeLg}>
             {value}
           </Text>
         ),
-        title: "LAST ACTIVITY",
+        title: renderSortableHeader("LAST ACTIVITY", LeadSortBy.CREATED_AT),
         width: 240,
       },
     ],
-    [selectedLeadId],
+    [onSortChange, sortBy, sortOrder],
   );
 
   return (

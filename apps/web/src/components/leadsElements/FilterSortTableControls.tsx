@@ -1,10 +1,9 @@
-import { DownOutlined, FilterOutlined } from "@ant-design/icons";
+import { DownOutlined } from "@ant-design/icons";
 import { Dropdown, type MenuProps } from "antd";
 import { observer } from "mobx-react-lite";
 
 import { View, Button } from "@/components/ui";
 import {
-  type LeadSortBy,
   type LeadSourceFilterValue,
   type LeadStatusFilterValue,
 } from "@/enums/lead.enums";
@@ -13,13 +12,11 @@ import { useRootStore } from "@/stores/use-root-store.ts";
 type Props = {
   statusMenuItems: MenuProps["items"];
   sourceMenuItems: MenuProps["items"];
-  sortMenuItems: MenuProps["items"];
 };
 
 const FilterSortTableControls = ({
   statusMenuItems,
   sourceMenuItems,
-  sortMenuItems,
 }: Props) => {
   const { lead } = useRootStore();
   return (
@@ -74,27 +71,6 @@ const FilterSortTableControls = ({
           variant="outline"
         >
           {lead.sourceFilterLabel}
-        </Button>
-      </Dropdown>
-
-      <Dropdown
-        menu={{
-          items: sortMenuItems,
-          onClick: ({ key }) => {
-            lead.setSort(key as LeadSortBy);
-          },
-        }}
-        trigger={["click"]}
-      >
-        <Button
-          borderRadius={2}
-          textColor="text"
-          icon={<FilterOutlined />}
-          iconPosition="start"
-          size="lg"
-          variant="outline"
-        >
-          {lead.sortLabel}
         </Button>
       </Dropdown>
     </View>

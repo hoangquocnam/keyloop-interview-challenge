@@ -6,7 +6,6 @@ import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { appRoutes } from "@/app/routes.ts";
 import { LeadInboxTable } from "@/components/leadsElements/LeadInboxTable";
 import { Text, View } from "@/components/ui";
-import { LEAD_SORT_OPTIONS } from "@/enums/lead.enums";
 import { useLeadInboxQuery } from "@/hooks/use-lead-inbox-query.ts";
 import { useRootStore } from "@/stores/use-root-store.ts";
 import { FONT } from "@/theme/design-tokens.ts";
@@ -43,11 +42,6 @@ export const LeadInboxPage = observer(() => {
       label: option.label,
     }),
   );
-
-  const sortMenuItems: MenuProps["items"] = LEAD_SORT_OPTIONS.map((option) => ({
-    key: option.value,
-    label: option.label,
-  }));
 
   useEffect(() => {
     lead.syncQueryFromUrl(queryFromUrl);
@@ -97,7 +91,6 @@ export const LeadInboxPage = observer(() => {
       <FilterSortTableControls
         statusMenuItems={statusMenuItems}
         sourceMenuItems={sourceMenuItems}
-        sortMenuItems={sortMenuItems}
       />
 
       {leadInboxQuery.isError ? (
@@ -146,6 +139,9 @@ export const LeadInboxPage = observer(() => {
             void navigate(`${appRoutes.leadDetail(leadId)}${location.search}`);
           }}
           rows={lead.items}
+          sortBy={lead.query.sortBy}
+          sortOrder={lead.query.sort}
+          onSortChange={lead.setSort}
           selectedLeadId={lead.selectedLeadId}
         />
       )}

@@ -7,6 +7,8 @@ import type {
   LeadInboxApiResponse,
   LeadInboxResponse,
   ListLeadsParams,
+  UpdateLeadAssigneePayload,
+  UpdateLeadAssigneeResponse,
   UpdateLeadStatusPayload,
   UpdateLeadStatusResponse,
 } from "./lead.types.ts";
@@ -124,6 +126,23 @@ export const updateLeadStatus = async (
     {
       body: JSON.stringify({
         status: payload.status,
+      }),
+      method: "PATCH",
+    },
+  );
+
+  return response.data;
+};
+
+export const updateLeadAssignee = async (
+  leadId: string,
+  payload: UpdateLeadAssigneePayload,
+): Promise<UpdateLeadAssigneeResponse> => {
+  const response = await requestJson<UpdateLeadAssigneeResponse>(
+    `/leads/${leadId}/assignee`,
+    {
+      body: JSON.stringify({
+        assignedToId: payload.assignedToId ?? null,
       }),
       method: "PATCH",
     },
