@@ -1,8 +1,13 @@
 import { requestJson } from "./api.ts";
 import type {
+  ArchiveLeadResponse,
+  CreateLeadActivityPayload,
+  LeadDetailResponse,
   LeadInboxApiResponse,
   LeadInboxResponse,
   ListLeadsParams,
+  UpdateLeadStatusPayload,
+  UpdateLeadStatusResponse,
 } from "./lead.types.ts";
 
 const appendSearchParam = (
@@ -60,4 +65,62 @@ export const fetchLeadInbox = async (
   );
 
   return normalizeLeadInboxResponse(response.data, params);
+};
+
+export const fetchLeadDetail = async (
+  leadId: string,
+): Promise<LeadDetailResponse> => {
+  const response = await requestJson<LeadDetailResponse>(`/leads/${leadId}`, {
+    method: "GET",
+  });
+
+  return response.data;
+};
+
+export const createLeadActivity = async (
+  leadId: string,
+  payload: CreateLeadActivityPayload,
+) => {
+  const response = await requestJson<LeadDetailResponse["timeline"][number]>(
+    `/leads/${leadId}/activities`,
+    {
+      body: JSON.stringify({
+        note: payload.note.trim(),
+        type: payload.type,
+      }),
+      method: "POST",
+    },
+  );
+
+  return response.data;
+};
+
+export const updateLeadStatus = async (
+  leadId: string,
+  payload: UpdateLeadStatusPayload,
+): Promise<UpdateLeadStatusResponse> => {
+  const response = await requestJson<UpdateLeadStatusResponse>(
+    `/leads/${leadId}/status`,
+    {
+      body: JSON.stringify({
+        status: payload.status,
+      }),
+      method: "PATCH",
+    },
+  );
+
+  return response.data;
+};
+
+export const archiveLead = async (
+  leadId: string,
+): Promise<ArchiveLeadResponse> => {
+  const response = await requestJson<ArchiveLeadResponse>(
+    `/leads/${leadId}/archive`,
+    {
+      method: "PATCH",
+    },
+  );
+
+  return response.data;
 };

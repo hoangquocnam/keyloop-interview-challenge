@@ -64,7 +64,10 @@ export const App = observer(() => {
           }}
           onSignOut={() => {
             queryClient.removeQueries({
-              queryKey: queryKeys.leadInbox(lead.query),
+              queryKey: queryKeys.leadInboxRoot,
+            });
+            queryClient.removeQueries({
+              queryKey: queryKeys.leadDetailRoot,
             });
             rootStore.logOut();
             void navigate(appRoutes.login);
@@ -148,13 +151,22 @@ export const App = observer(() => {
           <View
             as="main"
             backgroundColor="gray50"
+            display="flex"
+            flexDirection="column"
             minWidth={0}
             overflow="auto"
             px="lg"
             py="lg"
+            style={{ flex: "1 1 auto" }}
             width="100%"
           >
-            <View flexDirection="column" gap="lg" width="100%">
+            <View
+              flexDirection="column"
+              gap="lg"
+              minHeight={0}
+              style={{ flex: "1 1 auto", height: "100%" }}
+              width="100%"
+            >
               <Outlet />
             </View>
           </View>

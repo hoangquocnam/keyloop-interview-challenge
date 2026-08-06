@@ -9,6 +9,12 @@ CREATE TYPE "LeadStatus" AS ENUM ('NEW', 'CONTACTED', 'QUALIFIED', 'WON', 'LOST'
 -- CreateEnum
 CREATE TYPE "LeadSource" AS ENUM ('website_form', 'phone_inbound', 'walk_in');
 
+-- CreateEnum
+CREATE TYPE "PreferredContactMethod" AS ENUM ('email', 'phone', 'sms');
+
+-- CreateEnum
+CREATE TYPE "LeadActivityType" AS ENUM ('system', 'call', 'email', 'note');
+
 -- CreateTable
 CREATE TABLE "User" (
     "id" UUID NOT NULL DEFAULT gen_random_uuid(),
@@ -32,7 +38,9 @@ CREATE TABLE "Lead" (
     "message" TEXT,
     "source" "LeadSource" NOT NULL DEFAULT 'website_form',
     "status" "LeadStatus" NOT NULL DEFAULT 'NEW',
+    "preferredContactMethod" "PreferredContactMethod" NOT NULL DEFAULT 'email',
     "assignedToId" UUID,
+    "archivedAt" TIMESTAMP(3),
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -44,7 +52,8 @@ CREATE TABLE "LeadActivity" (
     "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "leadId" UUID NOT NULL,
     "userId" UUID NOT NULL,
-    "type" TEXT NOT NULL,
+    "type" "LeadActivityType" NOT NULL,
+    "title" TEXT NOT NULL,
     "note" TEXT NOT NULL,
     "happenedAt" TIMESTAMP(3) NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -60,6 +69,9 @@ CREATE INDEX "Lead_status_idx" ON "Lead"("status");
 
 -- CreateIndex
 CREATE INDEX "Lead_assignedToId_idx" ON "Lead"("assignedToId");
+
+-- CreateIndex
+CREATE INDEX "Lead_archivedAt_idx" ON "Lead"("archivedAt");
 
 -- CreateIndex
 CREATE INDEX "Lead_createdAt_idx" ON "Lead"("createdAt");

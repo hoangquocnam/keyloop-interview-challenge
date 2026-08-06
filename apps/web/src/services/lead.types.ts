@@ -58,3 +58,67 @@ export type ListLeadsParams = {
   source?: LeadSource;
   status?: LeadStatusValue;
 };
+
+export const LeadPreferredContactMethod = {
+  EMAIL: "email",
+  PHONE: "phone",
+} as const;
+
+export type LeadPreferredContactMethod =
+  (typeof LeadPreferredContactMethod)[keyof typeof LeadPreferredContactMethod];
+
+export const LeadTimelineItemType = {
+  CALL: "call",
+  EMAIL: "email",
+  NOTE: "note",
+  SYSTEM: "system",
+} as const;
+
+export type LeadTimelineItemType =
+  (typeof LeadTimelineItemType)[keyof typeof LeadTimelineItemType];
+
+export type LeadDetailTimelineItem = {
+  actorName: string;
+  happenedAt: string;
+  id: string;
+  note: string;
+  title: string;
+  type: LeadTimelineItemType;
+};
+
+export type LeadDetailResponse = {
+  contactInfo: {
+    email: string;
+    phone: string | null;
+    preferredMethod: LeadPreferredContactMethod;
+  };
+  customerName: string;
+  id: string;
+  inquiry: string | null;
+  leadDetails: {
+    assignedTo: LeadInboxAssignee | null;
+    createdAt: string;
+    source: LeadSource;
+  };
+  status: LeadInboxItem["status"];
+  timeline: LeadDetailTimelineItem[];
+};
+
+export type CreateLeadActivityPayload = {
+  note: string;
+  type: Exclude<LeadTimelineItemType, "system">;
+};
+
+export type UpdateLeadStatusPayload = {
+  status: LeadStatusValue;
+};
+
+export type UpdateLeadStatusResponse = {
+  status: LeadInboxItem["status"];
+  timelineItem: LeadDetailTimelineItem | null;
+};
+
+export type ArchiveLeadResponse = {
+  archivedAt: string;
+  id: string;
+};

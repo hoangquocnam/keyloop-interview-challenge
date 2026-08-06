@@ -8,7 +8,7 @@ import {
   type TokenSpacingValue,
   resolveBorderToken,
   resolveColorToken,
-  resolveSpacingToken,
+  resolveSpacingStyles,
 } from "@/theme/token-style.ts";
 
 type ButtonVariant = "primary" | "outline" | "link";
@@ -141,17 +141,23 @@ export const Button = ({
         fontWeight: fontWeight ?? FONT.fontWeightSemibold,
         height: height ?? sizeStyles[size].height,
         justifyContent,
-        margin: resolveSpacingToken(m),
-        marginBottom: resolveSpacingToken(mb ?? my),
-        marginLeft: resolveSpacingToken(ml ?? mx),
-        marginRight: resolveSpacingToken(mr ?? mx),
-        marginTop: resolveSpacingToken(mt ?? my),
-        padding: resolveSpacingToken(p),
-        paddingBottom: resolveSpacingToken(pb ?? py),
-        paddingLeft: resolveSpacingToken(pl ?? px),
-        paddingRight: resolveSpacingToken(pr ?? px),
-        paddingTop: resolveSpacingToken(pt ?? py),
         width,
+        ...resolveSpacingStyles({
+          m,
+          mb,
+          ml,
+          mr,
+          mt,
+          mx,
+          my,
+          p,
+          pb,
+          pl,
+          pr,
+          pt,
+          px,
+          py,
+        }),
         ...style,
       }}
     >

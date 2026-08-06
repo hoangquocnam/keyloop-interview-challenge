@@ -81,7 +81,7 @@ export const Sidebar = ({
             return (
               <Button
                 alignItems="center"
-                backgroundColor={isActive ? "gray200" : "transparent"}
+                backgroundColor={isActive ? "gray300" : "transparent"}
                 textColor="text"
                 display="flex"
                 fontSize={FONT.fontSizeLg}

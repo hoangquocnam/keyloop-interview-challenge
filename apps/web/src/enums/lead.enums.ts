@@ -10,9 +10,11 @@ export type LeadStatusValue =
   (typeof LeadStatusValue)[keyof typeof LeadStatusValue];
 
 export const LeadStatusTone = {
+  ERROR: "error",
   INFO: "info",
   NEUTRAL: "neutral",
   SUCCESS: "success",
+  WARNING: "warning",
 } as const;
 
 export type LeadStatusTone =
@@ -32,8 +34,7 @@ export const LeadSortOrder = {
   DESC: "desc",
 } as const;
 
-export type LeadSortOrder =
-  (typeof LeadSortOrder)[keyof typeof LeadSortOrder];
+export type LeadSortOrder = (typeof LeadSortOrder)[keyof typeof LeadSortOrder];
 
 export const LeadSource = {
   PHONE_INBOUND: "phone_inbound",
@@ -65,6 +66,14 @@ export const LEAD_STATUS_OPTIONS = [
   {
     label: LeadStatusValue.QUALIFIED,
     value: LeadStatusValue.QUALIFIED,
+  },
+  {
+    label: LeadStatusValue.WON,
+    value: LeadStatusValue.WON,
+  },
+  {
+    label: LeadStatusValue.LOST,
+    value: LeadStatusValue.LOST,
   },
 ] as const;
 
@@ -117,12 +126,14 @@ export type LeadStatusFilterValue =
   | "ALL"
   | typeof LeadStatusValue.NEW
   | typeof LeadStatusValue.CONTACTED
-  | typeof LeadStatusValue.QUALIFIED;
+  | typeof LeadStatusValue.QUALIFIED
+  | typeof LeadStatusValue.WON
+  | typeof LeadStatusValue.LOST;
 
 export type LeadSourceFilterValue = "ALL" | LeadSource;
 
 export const getLeadStatusLabel = (status?: LeadStatusValue) => {
-  return status ? `Status: ${status}` : "Status: All";
+  return status ?? "ALL";
 };
 
 export const getLeadSourceLabel = (source?: LeadSource) => {

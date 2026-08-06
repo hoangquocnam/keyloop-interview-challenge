@@ -11,7 +11,12 @@ import {
   getLeadSourceLabel,
   getLeadStatusLabel,
 } from "../enums/lead.enums.ts";
-import type { LeadInboxResponse, ListLeadsParams } from "../services/lead.types.ts";
+import type {
+  LeadDetailResponse,
+  LeadDetailTimelineItem,
+  LeadInboxResponse,
+  ListLeadsParams,
+} from "../services/lead.types.ts";
 
 const DEFAULT_PAGE_SIZE = 20;
 const SEARCH_DEBOUNCE_MS = 500;
@@ -32,6 +37,7 @@ export class LeadStore {
     totalPages: 1,
   };
   query: Omit<ListLeadsParams, "page"> = createDefaultQuery();
+  currentLead: LeadDetailResponse | null = null;
   searchInput = "";
   selectedLeadId: string | null = null;
   summary = "0 total leads requiring attention";
@@ -116,12 +122,50 @@ export class LeadStore {
     this.selectedLeadId = null;
   }
 
+  applyCurrentLead(leadDetail: LeadDetailResponse) {
+    this.currentLead = leadDetail;
+    this.selectedLeadId = leadDetail.id;
+  }
+
+  clearCurrentLead() {
+    this.currentLead = null;
+  }
+
+  prependCurrentLeadTimelineItem(timelineItem: LeadDetailTimelineItem) {
+    if (!this.currentLead) {
+      return;
+    }
+
+    this.currentLead = {
+      ...this.currentLead,
+      timeline: [timelineItem, ...this.currentLead.timeline],
+    };
+  }
+
+  updateCurrentLeadStatus(
+    status: LeadDetailResponse["status"],
+    timelineItem: LeadDetailTimelineItem | null,
+  ) {
+    if (!this.currentLead) {
+      return;
+    }
+
+    this.currentLead = {
+      ...this.currentLead,
+      status,
+      timeline: timelineItem
+        ? [timelineItem, ...this.currentLead.timeline]
+        : this.currentLead.timeline,
+    };
+  }
+
   reset() {
     if (this.searchDebounceWindowId != null) {
       window.clearTimeout(this.searchDebounceWindowId);
     }
 
     this.clearLeadInbox();
+    this.clearCurrentLead();
     this.query = createDefaultQuery();
     this.searchInput = "";
   }

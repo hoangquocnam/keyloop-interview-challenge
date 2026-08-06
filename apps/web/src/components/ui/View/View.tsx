@@ -12,7 +12,7 @@ import {
   resolveBorderToken,
   resolveColorToken,
   resolveShadowToken,
-  resolveSpacingToken,
+  resolveSpacingStyles,
 } from "@/theme/token-style.ts";
 
 type ViewOwnProps<T extends ElementType = "div"> = {
@@ -152,6 +152,11 @@ export const View = <T extends ElementType = "div">({
     flexWrap != null
       ? "flex"
       : undefined);
+  const resolvedBorderColor = resolveColorToken(borderColor);
+  const resolvedBorderRadius = resolveBorderToken(borderRadius);
+  const resolvedBoxShadow = resolveShadowToken(boxShadow);
+  const resolvedFlex =
+    typeof flex === "number" ? `${flex} 1 0%` : flex;
 
   return (
     <Component
@@ -160,52 +165,64 @@ export const View = <T extends ElementType = "div">({
       style={{
         alignItems,
         backgroundColor: resolveColorToken(backgroundColor),
-        borderColor: resolveColorToken(borderColor),
-        borderRadius: resolveBorderToken(borderRadius),
-        borderBottomStyle,
-        borderBottomWidth,
-        borderRightStyle,
-        borderRightWidth,
-        borderStyle,
-        borderTopStyle,
-        borderTopWidth,
-        borderWidth,
-        border,
+        ...(resolvedBorderColor !== undefined
+          ? { borderColor: resolvedBorderColor }
+          : {}),
+        ...(resolvedBorderRadius !== undefined
+          ? { borderRadius: resolvedBorderRadius }
+          : {}),
+        ...(borderBottomStyle !== undefined ? { borderBottomStyle } : {}),
+        ...(borderBottomWidth !== undefined ? { borderBottomWidth } : {}),
+        ...(borderRightStyle !== undefined ? { borderRightStyle } : {}),
+        ...(borderRightWidth !== undefined ? { borderRightWidth } : {}),
+        ...(borderStyle !== undefined ? { borderStyle } : {}),
+        ...(borderTopStyle !== undefined ? { borderTopStyle } : {}),
+        ...(borderTopWidth !== undefined ? { borderTopWidth } : {}),
+        ...(borderWidth !== undefined ? { borderWidth } : {}),
+        ...(border !== undefined ? { border } : {}),
         bottom,
-        boxShadow: resolveShadowToken(boxShadow),
+        ...(resolvedBoxShadow !== undefined ? { boxShadow: resolvedBoxShadow } : {}),
         cursor,
         display: resolvedDisplay,
-        flex,
+        ...(resolvedFlex !== undefined ? { flex: resolvedFlex } : {}),
         flexBasis,
         flexDirection,
         flexGrow,
         flexShrink,
         flexWrap,
-        gap: resolveSpacingToken(gap),
         gridTemplateColumns,
         gridTemplateRows,
         height,
         justifyContent,
         left,
-        margin: resolveSpacingToken(m),
-        marginBottom: resolveSpacingToken(mb ?? my),
-        marginLeft: resolveSpacingToken(ml ?? mx),
-        marginRight: resolveSpacingToken(mr ?? mx),
-        marginTop: resolveSpacingToken(mt ?? my),
         maxHeight,
         maxWidth,
         minHeight,
         minWidth,
         overflow,
-        padding: resolveSpacingToken(p),
-        paddingBottom: resolveSpacingToken(pb ?? py),
-        paddingLeft: resolveSpacingToken(pl ?? px),
-        paddingRight: resolveSpacingToken(pr ?? px),
-        paddingTop: resolveSpacingToken(pt ?? py),
         position,
         right,
         top,
         width,
+        ...resolveSpacingStyles({
+          columnGap,
+          gap,
+          m,
+          mb,
+          ml,
+          mr,
+          mt,
+          mx,
+          my,
+          p,
+          pb,
+          pl,
+          pr,
+          pt,
+          px,
+          py,
+          rowGap,
+        }),
         ...style,
       }}
     >

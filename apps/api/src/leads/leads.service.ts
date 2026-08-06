@@ -1,8 +1,30 @@
-import { LeadStatus, Prisma } from '@prisma/client';
-import { Injectable } from '@nestjs/common';
+import {
+  LeadActivityType,
+  LeadSource,
+  LeadStatus,
+  PreferredContactMethod,
+  Prisma,
+} from '@prisma/client';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import {
+  CreateLeadActivityDto,
+  LeadLogActivityType,
+} from './dto/create-lead-activity.dto';
+import { CreateLeadDto } from './dto/create-lead.dto';
+import {
+  LeadDetailDataDto,
+  LeadTimelineItemDto,
+} from './dto/lead-detail-response.dto';
+import { ArchiveLeadResponseDto } from './dto/archive-lead-response.dto';
 import { LeadInboxDataDto } from './dto/lead-inbox-response.dto';
 import { LeadSortBy, type ListLeadsQueryDto } from './dto/list-leads-query.dto';
+import { UpdateLeadStatusResponseDto } from './dto/update-lead-status-response.dto';
+import { UpdateLeadStatusDto } from './dto/update-lead-status.dto';
 
 const inboxStatuses = [
   LeadStatus.NEW,
@@ -26,9 +48,80 @@ const statusLabelMap: Record<LeadStatus, string> = {
   LOST: 'LOST',
 };
 
+const activityTitleByType: Record<LeadLogActivityType, string> = {
+  [LeadLogActivityType.CALL]: 'Outbound Call',
+  [LeadLogActivityType.EMAIL]: 'Email Sent',
+  [LeadLogActivityType.NOTE]: 'Note Added',
+};
+
+const prismaActivityTypeByLogType: Record<
+  LeadLogActivityType,
+  LeadActivityType
+> = {
+  [LeadLogActivityType.CALL]: LeadActivityType.call,
+  [LeadLogActivityType.EMAIL]: LeadActivityType.email,
+  [LeadLogActivityType.NOTE]: LeadActivityType.note,
+};
+
 @Injectable()
 export class LeadsService {
   constructor(private readonly prismaService: PrismaService) {}
+
+  async createLead(
+    userId: string,
+    createLeadDto: CreateLeadDto,
+  ): Promise<LeadDetailDataDto> {
+    const customerName = this.normalizeWhitespace(createLeadDto.customerName);
+    const email = createLeadDto.email.trim().toLowerCase();
+    const phone = createLeadDto.phone?.trim() || null;
+    const inquiry = createLeadDto.inquiry?.trim() || null;
+    const assignedToId = await this.resolveAssignedToId(
+      createLeadDto.assignedToId,
+    );
+
+    if (!customerName) {
+      throw new BadRequestException('Customer name is required.');
+    }
+
+    if (
+      createLeadDto.preferredContactMethod !== PreferredContactMethod.email &&
+      !phone
+    ) {
+      throw new BadRequestException(
+        'Phone number is required for the selected preferred contact method.',
+      );
+    }
+
+    const { firstName, lastName } = this.toLeadNameParts(customerName);
+
+    const createdLead = await this.prismaService.lead.create({
+      data: {
+        firstName,
+        lastName,
+        email,
+        phone,
+        message: inquiry,
+        source: createLeadDto.source,
+        status: LeadStatus.NEW,
+        preferredContactMethod: createLeadDto.preferredContactMethod,
+        assignedToId,
+        followUpActivities: {
+          create: {
+            userId,
+            type: LeadActivityType.system,
+            title: 'Lead Received',
+            note: this.toLeadReceivedNote(createLeadDto.source),
+            happenedAt: new Date(),
+          },
+        },
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    return this.getLeadDetail(createdLead.id);
+  }
 
   async listLeads(query: ListLeadsQueryDto): Promise<LeadInboxDataDto> {
     const page = query.page ?? 1;
@@ -54,6 +147,7 @@ export class LeadsService {
             take: 1,
             orderBy: [{ happenedAt: 'desc' }, { createdAt: 'desc' }],
             select: {
+              title: true,
               type: true,
               happenedAt: true,
             },
@@ -81,14 +175,11 @@ export class LeadsService {
             tone: statusToneMap[item.status],
           },
           assignedTo: item.assignedTo
-            ? {
-                id: item.assignedTo.id,
-                fullName: item.assignedTo.fullName,
-                initials: this.toInitials(item.assignedTo.fullName),
-              }
+            ? this.toAssigneeDto(item.assignedTo)
             : null,
           lastActivity: this.toLastActivityLabel(
             latestActivity?.type,
+            latestActivity?.title,
             latestActivity?.happenedAt,
           ),
           hasUnreadIndicator: item.status === LeadStatus.NEW,
@@ -99,10 +190,189 @@ export class LeadsService {
     };
   }
 
+  async getLeadDetail(leadId: string): Promise<LeadDetailDataDto> {
+    const lead = await this.prismaService.lead.findFirst({
+      where: {
+        id: leadId,
+        archivedAt: null,
+      },
+      include: {
+        assignedTo: {
+          select: {
+            id: true,
+            fullName: true,
+          },
+        },
+        followUpActivities: {
+          orderBy: [{ happenedAt: 'desc' }, { createdAt: 'desc' }],
+          select: {
+            id: true,
+            type: true,
+            title: true,
+            note: true,
+            happenedAt: true,
+            user: {
+              select: {
+                fullName: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!lead) {
+      throw new NotFoundException('Lead was not found.');
+    }
+
+    return {
+      id: lead.id,
+      customerName: this.toCustomerName(lead.firstName, lead.lastName),
+      inquiry: lead.message,
+      status: this.toStatusDto(lead.status),
+      contactInfo: {
+        email: lead.email,
+        phone: lead.phone,
+        preferredMethod: lead.preferredContactMethod,
+      },
+      leadDetails: {
+        source: lead.source,
+        createdAt: lead.createdAt,
+        assignedTo: lead.assignedTo
+          ? this.toAssigneeDto(lead.assignedTo)
+          : null,
+      },
+      timeline: lead.followUpActivities.map((activity) =>
+        this.toTimelineItem(activity),
+      ),
+    };
+  }
+
+  async createLeadActivity(
+    leadId: string,
+    userId: string,
+    createLeadActivityDto: CreateLeadActivityDto,
+  ): Promise<LeadTimelineItemDto> {
+    await this.ensureLeadExists(leadId);
+
+    const activity = await this.prismaService.leadActivity.create({
+      data: {
+        leadId,
+        userId,
+        type: prismaActivityTypeByLogType[createLeadActivityDto.type],
+        title: activityTitleByType[createLeadActivityDto.type],
+        note: createLeadActivityDto.note.trim(),
+        happenedAt: new Date(),
+      },
+      select: {
+        id: true,
+        type: true,
+        title: true,
+        note: true,
+        happenedAt: true,
+        user: {
+          select: {
+            fullName: true,
+          },
+        },
+      },
+    });
+
+    return this.toTimelineItem(activity);
+  }
+
+  async archiveLead(leadId: string): Promise<ArchiveLeadResponseDto> {
+    const lead = await this.findActiveLeadById(leadId, {
+      id: true,
+    });
+
+    if (!lead) {
+      throw new NotFoundException('Lead was not found.');
+    }
+
+    const archivedLead = await this.prismaService.lead.update({
+      where: { id: leadId },
+      data: {
+        archivedAt: new Date(),
+      },
+      select: {
+        id: true,
+        archivedAt: true,
+      },
+    });
+
+    return {
+      id: archivedLead.id,
+      archivedAt: archivedLead.archivedAt as Date,
+    };
+  }
+
+  async updateLeadStatus(
+    leadId: string,
+    userId: string,
+    updateLeadStatusDto: UpdateLeadStatusDto,
+  ): Promise<UpdateLeadStatusResponseDto> {
+    const lead = await this.findActiveLeadById(leadId, {
+      id: true,
+      status: true,
+    });
+
+    if (!lead) {
+      throw new NotFoundException('Lead was not found.');
+    }
+
+    if (lead.status === updateLeadStatusDto.status) {
+      return {
+        status: this.toStatusDto(lead.status),
+        timelineItem: null,
+      };
+    }
+
+    const happenedAt = new Date();
+    const nextStatusLabel = statusLabelMap[updateLeadStatusDto.status];
+
+    const [, activity] = await this.prismaService.$transaction([
+      this.prismaService.lead.update({
+        where: { id: leadId },
+        data: {
+          status: updateLeadStatusDto.status,
+        },
+      }),
+      this.prismaService.leadActivity.create({
+        data: {
+          leadId,
+          userId,
+          type: LeadActivityType.system,
+          title: 'Status Updated',
+          note: `Lead status updated to ${nextStatusLabel}.`,
+          happenedAt,
+        },
+        select: {
+          id: true,
+          type: true,
+          title: true,
+          note: true,
+          happenedAt: true,
+          user: {
+            select: {
+              fullName: true,
+            },
+          },
+        },
+      }),
+    ]);
+
+    return {
+      status: this.toStatusDto(updateLeadStatusDto.status),
+      timelineItem: this.toTimelineItem(activity),
+    };
+  }
+
   private buildWhereClause(query: ListLeadsQueryDto): Prisma.LeadWhereInput {
     const search = query.search?.trim();
 
     return {
+      archivedAt: null,
       status: query.status ? query.status : { in: inboxStatuses },
       ...(query.source
         ? {
@@ -171,8 +441,104 @@ export class LeadsService {
       .toUpperCase();
   }
 
-  private toLastActivityLabel(type?: string, happenedAt?: Date): string {
-    if (!type || !happenedAt) {
+  private toStatusDto(status: LeadStatus) {
+    return {
+      value: status,
+      label: statusLabelMap[status],
+      tone: statusToneMap[status],
+    };
+  }
+
+  private toAssigneeDto(assignee: { id: string; fullName: string }) {
+    return {
+      id: assignee.id,
+      fullName: assignee.fullName,
+      initials: this.toInitials(assignee.fullName),
+    };
+  }
+
+  private toCustomerName(firstName: string, lastName: string) {
+    return `${firstName} ${lastName}`.trim();
+  }
+
+  private normalizeWhitespace(value: string) {
+    return value.trim().replace(/\s+/g, ' ');
+  }
+
+  private toLeadNameParts(customerName: string) {
+    const nameParts = customerName.split(' ');
+
+    if (nameParts.length === 1) {
+      return {
+        firstName: customerName,
+        lastName: '',
+      };
+    }
+
+    return {
+      firstName: nameParts.slice(0, -1).join(' '),
+      lastName: nameParts[nameParts.length - 1] ?? '',
+    };
+  }
+
+  private toLeadReceivedNote(source: LeadSource) {
+    switch (source) {
+      case LeadSource.phone_inbound:
+        return 'New lead was created manually in the sales portal from a phone inbound conversation.';
+      case LeadSource.walk_in:
+        return 'New lead was created manually in the sales portal after an in-person dealership visit.';
+      case LeadSource.website_form:
+      default:
+        return 'New lead was created manually in the sales portal from a website inquiry.';
+    }
+  }
+
+  private async resolveAssignedToId(assignedToId?: string | null) {
+    if (!assignedToId) {
+      return null;
+    }
+
+    const assignedUser = await this.prismaService.user.findUnique({
+      where: { id: assignedToId },
+      select: { id: true },
+    });
+
+    if (!assignedUser) {
+      throw new NotFoundException('Assigned user was not found.');
+    }
+
+    return assignedUser.id;
+  }
+
+  private toTimelineItem(activity: {
+    id: string;
+    type: LeadActivityType;
+    title: string;
+    note: string;
+    happenedAt: Date;
+    user: {
+      fullName: string;
+    };
+  }): LeadTimelineItemDto {
+    return {
+      id: activity.id,
+      type: activity.type,
+      title: activity.title,
+      note: activity.note,
+      actorName:
+        activity.type === LeadActivityType.system
+          ? 'System'
+          : activity.user.fullName,
+      happenedAt: activity.happenedAt,
+    };
+  }
+
+  private toLastActivityLabel(
+    type?: LeadActivityType,
+    title?: string,
+    happenedAt?: Date,
+  ): string {
+    if (!type || !title || !happenedAt) {
       return 'No activity yet';
     }
 
@@ -188,25 +554,33 @@ export class LeadsService {
           ? `${Math.floor(diffInMinutes / 60)}h ago`
           : `${Math.floor(diffInMinutes / 1440)}d ago`;
 
-    if (type === 'lead_created') {
+    if (type === LeadActivityType.system && title === 'Lead Received') {
       return `Submitted ${relativeTime}`;
     }
 
-    if (type === 'call_logged') {
-      return `Call logged ${relativeTime}`;
-    }
-
-    if (type === 'quote_sent') {
-      return `Quote sent ${relativeTime}`;
-    }
-
-    return `${this.toSentenceLabel(type)} ${relativeTime}`;
+    return `${title} ${relativeTime}`;
   }
 
-  private toSentenceLabel(value: string): string {
-    return value
-      .split('_')
-      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-      .join(' ');
+  private async ensureLeadExists(leadId: string) {
+    const lead = await this.findActiveLeadById(leadId, {
+      id: true,
+    });
+
+    if (!lead) {
+      throw new NotFoundException('Lead was not found.');
+    }
+  }
+
+  private findActiveLeadById<TSelect extends Prisma.LeadSelect>(
+    leadId: string,
+    select: TSelect,
+  ) {
+    return this.prismaService.lead.findFirst({
+      where: {
+        id: leadId,
+        archivedAt: null,
+      },
+      select,
+    });
   }
 }

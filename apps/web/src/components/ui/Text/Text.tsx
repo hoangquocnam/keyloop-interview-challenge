@@ -4,7 +4,7 @@ import {
   type TokenColorValue,
   type TokenSpacingValue,
   resolveColorToken,
-  resolveSpacingToken,
+  resolveSpacingStyles,
 } from '@/theme/token-style.ts'
 
 type TextVariant = 'small' | 'medium' | 'large'
@@ -23,7 +23,15 @@ type TextProps = {
   ml?: TokenSpacingValue
   mr?: TokenSpacingValue
   mt?: TokenSpacingValue
+  mx?: TokenSpacingValue
+  my?: TokenSpacingValue
   p?: TokenSpacingValue
+  pb?: TokenSpacingValue
+  pl?: TokenSpacingValue
+  pr?: TokenSpacingValue
+  pt?: TokenSpacingValue
+  px?: TokenSpacingValue
+  py?: TokenSpacingValue
   style?: CSSProperties
   textAlign?: CSSProperties['textAlign']
   variant?: TextVariant
@@ -63,7 +71,15 @@ export const Text = ({
   ml,
   mr,
   mt,
+  mx,
+  my,
   p,
+  pb,
+  pl,
+  pr,
+  pt,
+  px,
+  py,
   style,
   textAlign,
   variant = 'medium',
@@ -81,15 +97,25 @@ export const Text = ({
         height,
         letterSpacing,
         lineHeight: lineHeight ?? variantStyles[variant].lineHeight,
-        margin: resolveSpacingToken(m),
-        marginBottom: resolveSpacingToken(mb),
-        marginLeft: resolveSpacingToken(ml),
-        marginRight: resolveSpacingToken(mr),
-        marginTop: resolveSpacingToken(mt),
-        padding: resolveSpacingToken(p),
         textAlign,
         width,
         fontWeight: weight ?? variantStyles[variant].fontWeight,
+        ...resolveSpacingStyles({
+          m,
+          mb,
+          ml,
+          mr,
+          mt,
+          mx,
+          my,
+          p,
+          pb,
+          pl,
+          pr,
+          pt,
+          px,
+          py,
+        }),
         ...style,
       }}
     >

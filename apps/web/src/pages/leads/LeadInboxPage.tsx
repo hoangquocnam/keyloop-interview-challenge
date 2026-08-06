@@ -1,8 +1,9 @@
 import { Empty, type MenuProps } from "antd";
 import { observer } from "mobx-react-lite";
 import { useEffect, useMemo } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 
+import { appRoutes } from "@/app/routes.ts";
 import { LeadInboxTable } from "@/components/leadsElements/LeadInboxTable";
 import { Text, View } from "@/components/ui";
 import { LEAD_SORT_OPTIONS } from "@/enums/lead.enums";
@@ -17,6 +18,8 @@ import FilterSortTableControls from "@/components/leadsElements/FilterSortTableC
 
 export const LeadInboxPage = observer(() => {
   const { auth, lead } = useRootStore();
+  const location = useLocation();
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const queryFromUrl = useMemo(
     () => getQueryFromSearchParams(searchParams),
@@ -70,8 +73,13 @@ export const LeadInboxPage = observer(() => {
   }, [lead, leadInboxQuery.data?.pages, leadInboxQuery.isFetching]);
 
   return (
-    <View flexDirection="column" gap="md">
-      <View flexDirection="column" gap="xs">
+    <View
+      flexDirection="column"
+      gap="md"
+      minHeight={0}
+      style={{ flex: "1 1 auto", height: "100%" }}
+    >
+      <View flexDirection="column" flexShrink={0} gap="xs">
         <Text
           as="h1"
           fontSize={FONT.fontSize2Xl}
@@ -133,7 +141,10 @@ export const LeadInboxPage = observer(() => {
               void leadInboxQuery.fetchNextPage();
             }
           }}
-          onSelectLead={lead.selectLead}
+          onSelectLead={(leadId) => {
+            lead.selectLead(leadId);
+            void navigate(`${appRoutes.leadDetail(leadId)}${location.search}`);
+          }}
           rows={lead.items}
           selectedLeadId={lead.selectedLeadId}
         />

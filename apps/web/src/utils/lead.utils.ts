@@ -3,6 +3,8 @@ import type { ListLeadsParams } from "@/services/lead.types";
 
 const DEFAULT_LIMIT = 20;
 const MAX_LIMIT = 50;
+const DEFAULT_SORT_BY = LEAD_SORT_OPTIONS[0].value;
+const DEFAULT_SORT_ORDER = LeadSortOrder.DESC;
 
 const isLeadSortBy = (value: string | null): value is LeadSortBy => {
   return (
@@ -64,9 +66,17 @@ export const getQueryFromSearchParams = (
 export const getSearchParamsFromQuery = (query: Omit<ListLeadsParams, "page">) => {
   const nextSearchParams = new URLSearchParams();
 
-  nextSearchParams.set("limit", String(query.limit));
-  nextSearchParams.set("sortBy", query.sortBy);
-  nextSearchParams.set("sort", query.sort);
+  if (query.limit !== DEFAULT_LIMIT) {
+    nextSearchParams.set("limit", String(query.limit));
+  }
+
+  if (query.sortBy !== DEFAULT_SORT_BY) {
+    nextSearchParams.set("sortBy", query.sortBy);
+  }
+
+  if (query.sort !== DEFAULT_SORT_ORDER) {
+    nextSearchParams.set("sort", query.sort);
+  }
 
   if (query.search) {
     nextSearchParams.set("search", query.search);

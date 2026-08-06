@@ -24,11 +24,13 @@ const FilterSortTableControls = ({
   const { lead } = useRootStore();
   return (
     <View
+      backgroundColor="surface"
       borderColor="border"
       borderRadius={2}
       borderStyle="solid"
       borderWidth={1}
       flexDirection="row"
+      flexShrink={0}
       gap="sm"
       p="sm"
       width="100%"
@@ -50,7 +52,7 @@ const FilterSortTableControls = ({
           size="lg"
           variant="outline"
         >
-          {lead.statusFilterLabel}
+          {`Status: ${lead.statusFilterLabel}`}
         </Button>
       </Dropdown>
 

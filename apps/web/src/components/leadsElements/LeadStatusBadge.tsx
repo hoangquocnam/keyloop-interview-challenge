@@ -1,42 +1,49 @@
-import type { LeadStatusTone } from '../../enums/lead.enums.ts'
-import { Text, View } from "@/components/ui"
-import { FONT } from '@/theme/design-tokens.ts'
+import type { LeadStatusValue } from "../../enums/lead.enums.ts";
+import { Text, View } from "@/components/ui";
+import { FONT } from "@/theme/design-tokens.ts";
 
-const toneStyles: Record<
-  LeadStatusTone,
+const statusStyles: Record<
+  LeadStatusValue,
   {
-    backgroundColor: string
-    borderColor: string
-    color: string
+    backgroundColor: string;
+    borderColor: string;
+    color: string;
   }
 > = {
-  info: {
-    backgroundColor: 'info_50',
-    borderColor: 'info_100',
-    color: 'info',
+  CONTACTED: {
+    backgroundColor: "warning_50",
+    borderColor: "warning_200",
+    color: "warning_700",
   },
-  neutral: {
-    backgroundColor: 'gray100',
-    borderColor: 'gray200',
-    color: 'gray700',
+  LOST: {
+    backgroundColor: "error_50",
+    borderColor: "error_200",
+    color: "error_700",
   },
-  success: {
-    backgroundColor: 'success_50',
-    borderColor: 'success_200',
-    color: 'success',
+  NEW: {
+    backgroundColor: "gray100",
+    borderColor: "gray200",
+    color: "gray700",
   },
-}
+  QUALIFIED: {
+    backgroundColor: "info_50",
+    borderColor: "info_200",
+    color: "info_700",
+  },
+  WON: {
+    backgroundColor: "success_50",
+    borderColor: "success_200",
+    color: "success_500",
+  },
+};
 
 type LeadStatusBadgeProps = {
-  label: string
-  tone: LeadStatusTone
-}
+  label: string;
+  value: LeadStatusValue;
+};
 
-export const LeadStatusBadge = ({
-  label,
-  tone,
-}: LeadStatusBadgeProps) => {
-  const toneStyle = toneStyles[tone]
+export const LeadStatusBadge = ({ label, value }: LeadStatusBadgeProps) => {
+  const toneStyle = statusStyles[value];
 
   return (
     <View
@@ -61,5 +68,5 @@ export const LeadStatusBadge = ({
         {label}
       </Text>
     </View>
-  )
-}
+  );
+};

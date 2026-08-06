@@ -26,6 +26,19 @@ enum LeadSource {
   walk_in
 }
 
+enum PreferredContactMethod {
+  email
+  phone
+  sms
+}
+
+enum LeadActivityType {
+  system
+  call
+  email
+  note
+}
+
 model User {
   id           String         @id @default(uuid()) @db.Uuid
   email        String         @unique
@@ -39,35 +52,39 @@ model User {
 }
 
 model Lead {
-  id                 String         @id @default(uuid()) @db.Uuid
-  firstName          String
-  lastName           String
-  email              String
-  phone              String?
-  message            String?
-  source             LeadSource     @default(website_form)
-  status             LeadStatus     @default(NEW)
-  assignedToId       String?        @db.Uuid
-  assignedTo         User?          @relation("AssignedSalesperson", fields: [assignedToId], references: [id], onDelete: SetNull)
-  createdAt          DateTime       @default(now())
-  updatedAt          DateTime       @updatedAt
-  followUpActivities LeadActivity[]
+  id                     String                 @id @default(uuid()) @db.Uuid
+  firstName              String
+  lastName               String
+  email                  String
+  phone                  String?
+  message                String?
+  source                 LeadSource             @default(website_form)
+  status                 LeadStatus             @default(NEW)
+  preferredContactMethod PreferredContactMethod @default(email)
+  assignedToId           String?                @db.Uuid
+  assignedTo             User?                  @relation("AssignedSalesperson", fields: [assignedToId], references: [id], onDelete: SetNull)
+  archivedAt             DateTime?
+  createdAt              DateTime               @default(now())
+  updatedAt              DateTime               @updatedAt
+  followUpActivities     LeadActivity[]
 
   @@index([status])
   @@index([assignedToId])
+  @@index([archivedAt])
   @@index([createdAt])
 }
 
 model LeadActivity {
-  id         String   @id @default(uuid()) @db.Uuid
-  leadId     String   @db.Uuid
-  userId     String   @db.Uuid
-  type       String
+  id         String           @id @default(uuid()) @db.Uuid
+  leadId     String           @db.Uuid
+  userId     String           @db.Uuid
+  type       LeadActivityType
+  title      String
   note       String
   happenedAt DateTime
-  createdAt  DateTime @default(now())
-  lead       Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
-  user       User     @relation(fields: [userId], references: [id], onDelete: Restrict)
+  createdAt  DateTime         @default(now())
+  lead       Lead             @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  user       User             @relation(fields: [userId], references: [id], onDelete: Restrict)
 
   @@index([leadId, happenedAt])
   @@index([userId])
