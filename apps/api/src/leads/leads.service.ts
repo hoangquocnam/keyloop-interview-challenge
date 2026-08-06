@@ -26,12 +26,6 @@ import { LeadSortBy, type ListLeadsQueryDto } from './dto/list-leads-query.dto';
 import { UpdateLeadStatusResponseDto } from './dto/update-lead-status-response.dto';
 import { UpdateLeadStatusDto } from './dto/update-lead-status.dto';
 
-const inboxStatuses = [
-  LeadStatus.NEW,
-  LeadStatus.CONTACTED,
-  LeadStatus.QUALIFIED,
-];
-
 const statusToneMap: Record<LeadStatus, 'neutral' | 'info' | 'success'> = {
   NEW: 'neutral',
   CONTACTED: 'info',
@@ -373,7 +367,11 @@ export class LeadsService {
 
     return {
       archivedAt: null,
-      status: query.status ? query.status : { in: inboxStatuses },
+      ...(query.status
+        ? {
+            status: query.status,
+          }
+        : {}),
       ...(query.source
         ? {
             source: query.source,

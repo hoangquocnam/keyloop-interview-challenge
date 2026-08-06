@@ -2,6 +2,7 @@ import { requestJson } from "./api.ts";
 import type {
   ArchiveLeadResponse,
   CreateLeadActivityPayload,
+  CreateLeadPayload,
   LeadDetailResponse,
   LeadInboxApiResponse,
   LeadInboxResponse,
@@ -72,6 +73,25 @@ export const fetchLeadDetail = async (
 ): Promise<LeadDetailResponse> => {
   const response = await requestJson<LeadDetailResponse>(`/leads/${leadId}`, {
     method: "GET",
+  });
+
+  return response.data;
+};
+
+export const createLead = async (
+  payload: CreateLeadPayload,
+): Promise<LeadDetailResponse> => {
+  const response = await requestJson<LeadDetailResponse>("/leads", {
+    body: JSON.stringify({
+      assignedToId: payload.assignedToId ?? undefined,
+      customerName: payload.customerName.trim(),
+      email: payload.email.trim(),
+      inquiry: payload.inquiry ?? undefined,
+      phone: payload.phone ?? undefined,
+      preferredContactMethod: payload.preferredContactMethod,
+      source: payload.source,
+    }),
+    method: "POST",
   });
 
   return response.data;

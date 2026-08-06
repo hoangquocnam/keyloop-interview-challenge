@@ -268,7 +268,7 @@ export const LeadInboxTable = ({
       overflow="hidden"
       style={{ flex: "1 1 auto", height: "100%" }}
       width="100%"
-      height={1000}
+      height={"100%"}
     >
       <div
         ref={tableWrapperRef}
@@ -279,6 +279,7 @@ export const LeadInboxTable = ({
           minHeight: 0,
           overflow: "hidden",
           width: "100%",
+          height: "100%",
         }}
       >
         <Table<LeadInboxItem>
@@ -300,7 +301,7 @@ export const LeadInboxTable = ({
           pagination={false}
           rowKey="id"
           scroll={{ x: 1540, y: tableScrollHeight }}
-          style={{ flex: 1, minHeight: 0, width: "100%" }}
+          style={{ flex: 1, minHeight: 0, width: "100%", height: "100%" }}
         />
       </div>
 

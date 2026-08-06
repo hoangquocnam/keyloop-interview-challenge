@@ -2,6 +2,7 @@ import { Navigate, createBrowserRouter } from 'react-router-dom'
 import { App } from '../App.tsx'
 import { LoginPage } from '../pages/auth/LoginPage.tsx'
 import { DashboardPage } from '../pages/dashboard/DashboardPage.tsx'
+import { CreateLeadPage } from '../pages/leads/CreateLeadPage.tsx'
 import { LeadDetailPage } from '../pages/leads/LeadDetailPage.tsx'
 import { LeadInboxPage } from '../pages/leads/LeadInboxPage.tsx'
 import { RequireAuth, RequireGuest } from './route-guards.tsx'
@@ -35,6 +36,10 @@ export const router = createBrowserRouter([
           {
             path: 'leads',
             element: <LeadInboxPage />,
+          },
+          {
+            path: 'leads/new',
+            element: <CreateLeadPage />,
           },
           {
             path: 'leads/:leadId',

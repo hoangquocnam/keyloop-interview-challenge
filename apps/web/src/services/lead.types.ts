@@ -109,6 +109,16 @@ export type CreateLeadActivityPayload = {
   type: Exclude<LeadTimelineItemType, "system">;
 };
 
+export type CreateLeadPayload = {
+  assignedToId?: string | null;
+  customerName: string;
+  email: string;
+  inquiry?: string | null;
+  phone?: string | null;
+  preferredContactMethod: LeadPreferredContactMethod;
+  source: LeadSource;
+};
+
 export type UpdateLeadStatusPayload = {
   status: LeadStatusValue;
 };

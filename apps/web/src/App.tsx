@@ -137,7 +137,7 @@ export const App = observer(() => {
                 fontWeight={FONT.fontWeightBold}
                 icon={<PlusOutlined />}
                 onClick={() => {
-                  void navigate(appRoutes.leads);
+                  void navigate(`${appRoutes.leadCreate}${location.search}`);
                 }}
                 px="md"
                 size="md"

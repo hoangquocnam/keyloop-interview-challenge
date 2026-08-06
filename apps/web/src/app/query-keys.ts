@@ -6,4 +6,6 @@ export const queryKeys = {
   leadInbox: (params: Omit<ListLeadsParams, "page">) =>
     ["lead-inbox", params] as const,
   leadInboxRoot: ["lead-inbox"] as const,
+  usersList: ["users-list"] as const,
+  usersRoot: ["users"] as const,
 };
