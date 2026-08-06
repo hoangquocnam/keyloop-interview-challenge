@@ -7,6 +7,7 @@ import type {
   LeadInboxApiResponse,
   LeadInboxResponse,
   ListLeadsParams,
+  UpdateLeadPayload,
   UpdateLeadAssigneePayload,
   UpdateLeadAssigneeResponse,
   UpdateLeadStatusPayload,
@@ -94,6 +95,25 @@ export const createLead = async (
       source: payload.source,
     }),
     method: "POST",
+  });
+
+  return response.data;
+};
+
+export const updateLead = async (
+  leadId: string,
+  payload: UpdateLeadPayload,
+): Promise<LeadDetailResponse> => {
+  const response = await requestJson<LeadDetailResponse>(`/leads/${leadId}`, {
+    body: JSON.stringify({
+      customerName: payload.customerName?.trim(),
+      email: payload.email?.trim(),
+      inquiry: payload.inquiry,
+      phone: payload.phone,
+      preferredContactMethod: payload.preferredContactMethod,
+      source: payload.source,
+    }),
+    method: "PATCH",
   });
 
   return response.data;

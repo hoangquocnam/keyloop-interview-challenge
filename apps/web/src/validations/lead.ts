@@ -15,7 +15,7 @@ const preferredContactMethodValues = Object.values(
   ...(typeof LeadPreferredContactMethod)[keyof typeof LeadPreferredContactMethod][],
 ];
 
-export const createLeadSchema = z
+const createLeadSchemaBase = z
   .object({
     assignedToId: z
       .string()
@@ -47,8 +47,14 @@ export const createLeadSchema = z
       .refine((value) => leadSourceValues.includes(value as (typeof leadSourceValues)[number]), {
         message: "Lead source is required",
       }),
-  })
-  .superRefine((values, context) => {
+  });
+
+const withPhoneRequirement = <
+  TSchema extends z.ZodObject<z.core.$ZodLooseShape>,
+>(
+  schema: TSchema,
+) =>
+  schema.superRefine((values, context) => {
     if (
       values.preferredContactMethod !== LeadPreferredContactMethod.EMAIL &&
       values.phone.trim().length === 0
@@ -62,4 +68,18 @@ export const createLeadSchema = z
     }
   });
 
+export const createLeadSchema = withPhoneRequirement(createLeadSchemaBase);
+
 export type CreateLeadFormValues = z.infer<typeof createLeadSchema>;
+
+const updateLeadInfoSchemaBase = createLeadSchemaBase.pick({
+  email: true,
+  phone: true,
+  preferredContactMethod: true,
+  source: true,
+});
+
+export const updateLeadInfoSchema =
+  withPhoneRequirement(updateLeadInfoSchemaBase);
+
+export type UpdateLeadInfoFormValues = z.infer<typeof updateLeadInfoSchema>;

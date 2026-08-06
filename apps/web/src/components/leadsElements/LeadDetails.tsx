@@ -1,4 +1,4 @@
-import { DeleteOutlined } from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import { Avatar, Dropdown, Spin } from "antd";
 
 import { LeadDetailCard } from "@/components/leadsElements/LeadDetailCard.tsx";
@@ -13,6 +13,7 @@ type LeadDetailsProps = {
   createdAtLabel: string;
   isUpdatingAssignee?: boolean;
   onDeleteClick: () => void;
+  onEditClick: () => void;
   onSelectAssignee: (assignedToId: string | null) => void;
   sourceLabel: string;
   users: UserSummary[];
@@ -23,6 +24,7 @@ export const LeadDetails = ({
   createdAtLabel,
   isUpdatingAssignee = false,
   onDeleteClick,
+  onEditClick,
   onSelectAssignee,
   sourceLabel,
   users,
@@ -39,7 +41,19 @@ export const LeadDetails = ({
   ];
 
   return (
-    <LeadDetailCard title="LEAD DETAILS">
+    <LeadDetailCard
+      action={
+        <Button
+          icon={<EditOutlined />}
+          onClick={onEditClick}
+          size="sm"
+          variant="link"
+        >
+          Edit
+        </Button>
+      }
+      title="LEAD DETAILS"
+    >
       <View backgroundColor="border" height={1} width="100%" />
       <View flexDirection="column" gap="lg">
         <LeadDetailInfoRow label="Source" value={sourceLabel} />

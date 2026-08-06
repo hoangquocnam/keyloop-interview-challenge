@@ -5,7 +5,8 @@ import {
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
-import type { Response } from 'express';
+import type { Request, Response } from 'express';
+import { resolveRequestId } from '../http/request-id';
 
 type ErrorPayload = {
   readonly error?: string;
@@ -16,7 +17,10 @@ type ErrorPayload = {
 @Catch()
 export class ApiExceptionFilter implements ExceptionFilter {
   catch(exception: unknown, host: ArgumentsHost): void {
-    const response = host.switchToHttp().getResponse<Response>();
+    const httpContext = host.switchToHttp();
+    const request = httpContext.getRequest<Request>();
+    const response = httpContext.getResponse<Response>();
+    const requestId = resolveRequestId(request, response);
     const statusCode =
       exception instanceof HttpException
         ? exception.getStatus()
@@ -48,6 +52,7 @@ export class ApiExceptionFilter implements ExceptionFilter {
     response.status(statusCode).json({
       success: false,
       statusCode: String(statusCode),
+      requestId,
       error,
       errorMessage,
     });

@@ -17,6 +17,7 @@ import { ActivityTimeline } from "@/components/leadsElements/ActivityTimeline.ts
 import { ConfirmDelete } from "@/components/leadsElements/ConfirmDelete.tsx";
 import { ContactInfo } from "@/components/leadsElements/ContactInfo.tsx";
 import { CustomerInquiry } from "@/components/leadsElements/CustomerInquiry.tsx";
+import { EditLeadInfoModal } from "@/components/leadsElements/EditLeadInfoModal.tsx";
 import { leadDetailCardBorderProps } from "@/components/leadsElements/LeadDetailCard.tsx";
 import { LeadDetails } from "@/components/leadsElements/LeadDetails.tsx";
 import { LeadStatusBadge } from "@/components/leadsElements/LeadStatusBadge.tsx";
@@ -38,6 +39,7 @@ import { useUsersQuery } from "@/hooks/use-users-query.ts";
 import {
   archiveLead,
   createLeadActivity,
+  updateLead,
   updateLeadAssignee,
   updateLeadStatus,
 } from "@/services/leads.ts";
@@ -48,6 +50,7 @@ import {
   type LeadDetailResponse,
   type LeadDetailTimelineItem,
   type UpdateLeadAssigneePayload,
+  type UpdateLeadPayload,
 } from "@/services/lead.types.ts";
 import { useRootStore } from "@/stores/use-root-store.ts";
 import { FONT } from "@/theme/design-tokens.ts";
@@ -120,6 +123,7 @@ export const LeadDetailPage = observer(() => {
   const [activityMode, setActivityMode] =
     useState<LeadActivityComposerModeValue>(LeadActivityComposerMode.CALL);
   const [activityDraft, setActivityDraft] = useState("");
+  const [isEditLeadInfoModalOpen, setIsEditLeadInfoModalOpen] = useState(false);
   const [isArchived, setIsArchived] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const queryFromUrl = useMemo(
@@ -243,6 +247,30 @@ export const LeadDetailPage = observer(() => {
         });
       }
 
+      await invalidateLeadQueries();
+    },
+  });
+
+  const updateLeadMutation = useMutation({
+    mutationFn: async (payload: UpdateLeadPayload) => {
+      return updateLead(leadId as string, payload);
+    },
+    onError: (error: Error) => {
+      notificationApi.error({
+        description: error.message,
+        message: "Failed to update lead info",
+        placement: "bottomRight",
+      });
+    },
+    onSuccess: async (updatedLead) => {
+      setIsEditLeadInfoModalOpen(false);
+      lead.applyCurrentLead(updatedLead);
+      queryClient.setQueryData(queryKeys.leadDetail(leadId as string), updatedLead);
+      notificationApi.success({
+        description: null,
+        message: "Lead info updated successfully",
+        placement: "bottomRight",
+      });
       await invalidateLeadQueries();
     },
   });
@@ -510,6 +538,26 @@ export const LeadDetailPage = observer(() => {
         }}
         open={isDeleteModalOpen}
       />
+      <EditLeadInfoModal
+        isSubmitting={updateLeadMutation.isPending}
+        lead={currentLead}
+        onCancel={() => {
+          if (updateLeadMutation.isPending) {
+            return;
+          }
+
+          setIsEditLeadInfoModalOpen(false);
+        }}
+        onSubmit={(values) => {
+          void updateLeadMutation.mutateAsync({
+            email: values.email.trim(),
+            phone: values.phone.trim() || null,
+            preferredContactMethod: values.preferredContactMethod,
+            source: values.source as LeadSource,
+          });
+        }}
+        open={isEditLeadInfoModalOpen}
+      />
       <View
         flexDirection="column"
         gap="lg"
@@ -611,6 +659,9 @@ export const LeadDetailPage = observer(() => {
               <View flexDirection="column" gap="lg" minWidth={320} width={360}>
                 <ContactInfo
                   email={currentLead.contactInfo.email}
+                  onEditClick={() => {
+                    setIsEditLeadInfoModalOpen(true);
+                  }}
                   phone={currentLead.contactInfo.phone}
                   preferredMethod={getPreferredMethodLabel(
                     currentLead.contactInfo.preferredMethod,
@@ -624,6 +675,9 @@ export const LeadDetailPage = observer(() => {
                   isUpdatingAssignee={updateLeadAssigneeMutation.isPending}
                   onDeleteClick={() => {
                     setIsDeleteModalOpen(true);
+                  }}
+                  onEditClick={() => {
+                    setIsEditLeadInfoModalOpen(true);
                   }}
                   onSelectAssignee={(assignedToId) => {
                     if (updateLeadAssigneeMutation.isPending) {

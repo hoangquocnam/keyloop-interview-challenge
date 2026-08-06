@@ -119,6 +119,15 @@ export type CreateLeadPayload = {
   source: LeadSource;
 };
 
+export type UpdateLeadPayload = {
+  customerName?: string;
+  email?: string;
+  inquiry?: string | null;
+  phone?: string | null;
+  preferredContactMethod?: LeadPreferredContactMethod;
+  source?: LeadSource;
+};
+
 export type UpdateLeadStatusPayload = {
   status: LeadStatusValue;
 };

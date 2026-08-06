@@ -26,6 +26,7 @@ import { LeadSortBy, type ListLeadsQueryDto } from './dto/list-leads-query.dto';
 import { UpdateLeadStatusResponseDto } from './dto/update-lead-status-response.dto';
 import { UpdateLeadAssigneeResponseDto } from './dto/update-lead-assignee-response.dto';
 import { UpdateLeadAssigneeDto } from './dto/update-lead-assignee.dto';
+import { UpdateLeadDto } from './dto/update-lead.dto';
 import { UpdateLeadStatusDto } from './dto/update-lead-status.dto';
 
 const statusToneMap: Record<LeadStatus, 'neutral' | 'info' | 'success'> = {
@@ -277,6 +278,76 @@ export class LeadsService {
     return this.toTimelineItem(activity);
   }
 
+  async updateLead(
+    leadId: string,
+    updateLeadDto: UpdateLeadDto,
+  ): Promise<LeadDetailDataDto> {
+    const lead = await this.findActiveLeadById(leadId, {
+      email: true,
+      firstName: true,
+      id: true,
+      lastName: true,
+      message: true,
+      phone: true,
+      preferredContactMethod: true,
+      source: true,
+    });
+
+    if (!lead) {
+      throw new NotFoundException('Lead was not found.');
+    }
+
+    const nextCustomerName =
+      updateLeadDto.customerName !== undefined
+        ? this.normalizeWhitespace(updateLeadDto.customerName)
+        : this.toCustomerName(lead.firstName, lead.lastName);
+
+    if (!nextCustomerName) {
+      throw new BadRequestException('Customer name is required.');
+    }
+
+    const { firstName, lastName } = this.toLeadNameParts(nextCustomerName);
+    const nextEmail =
+      updateLeadDto.email !== undefined
+        ? updateLeadDto.email.trim().toLowerCase()
+        : lead.email;
+    const nextPhone =
+      updateLeadDto.phone !== undefined
+        ? updateLeadDto.phone?.trim() || null
+        : lead.phone;
+    const nextInquiry =
+      updateLeadDto.inquiry !== undefined
+        ? updateLeadDto.inquiry?.trim() || null
+        : lead.message;
+    const nextPreferredMethod =
+      updateLeadDto.preferredContactMethod ?? lead.preferredContactMethod;
+    const nextSource = updateLeadDto.source ?? lead.source;
+
+    if (nextPreferredMethod !== PreferredContactMethod.email && !nextPhone) {
+      throw new BadRequestException(
+        'Phone number is required for the selected preferred contact method.',
+      );
+    }
+
+    await this.prismaService.lead.update({
+      where: { id: leadId },
+      data: {
+        email: nextEmail,
+        firstName,
+        lastName,
+        message: nextInquiry,
+        phone: nextPhone,
+        preferredContactMethod: nextPreferredMethod,
+        source: nextSource,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    return this.getLeadDetail(leadId);
+  }
+
   async archiveLead(leadId: string): Promise<ArchiveLeadResponseDto> {
     const lead = await this.findActiveLeadById(leadId, {
       id: true,
@@ -390,7 +461,9 @@ export class LeadsService {
 
     if (lead.assignedToId === nextAssignedToId) {
       return {
-        assignedTo: lead.assignedTo ? this.toAssigneeDto(lead.assignedTo) : null,
+        assignedTo: lead.assignedTo
+          ? this.toAssigneeDto(lead.assignedTo)
+          : null,
         timelineItem: null,
       };
     }

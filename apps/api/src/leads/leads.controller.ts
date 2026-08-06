@@ -31,6 +31,7 @@ import { ListLeadsQueryDto } from './dto/list-leads-query.dto';
 import { UpdateLeadStatusResponseDto } from './dto/update-lead-status-response.dto';
 import { UpdateLeadAssigneeResponseDto } from './dto/update-lead-assignee-response.dto';
 import { UpdateLeadAssigneeDto } from './dto/update-lead-assignee.dto';
+import { UpdateLeadDto } from './dto/update-lead.dto';
 import { UpdateLeadStatusDto } from './dto/update-lead-status.dto';
 import { LeadsService } from './leads.service';
 
@@ -72,6 +73,18 @@ export class LeadsController {
     @Param('leadId', new ParseUUIDPipe()) leadId: string,
   ): Promise<LeadDetailDataDto> {
     return this.leadsService.getLeadDetail(leadId);
+  }
+
+  @Patch(':leadId')
+  @ApiOperation({
+    summary: 'Update editable contact and lead metadata for the specified lead',
+  })
+  @ApiOkResponse({ type: LeadDetailDataDto })
+  updateLead(
+    @Param('leadId', new ParseUUIDPipe()) leadId: string,
+    @Body() updateLeadDto: UpdateLeadDto,
+  ): Promise<LeadDetailDataDto> {
+    return this.leadsService.updateLead(leadId, updateLeadDto);
   }
 
   @Post(':leadId/activities')
