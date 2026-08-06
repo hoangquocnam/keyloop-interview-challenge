@@ -20,13 +20,17 @@ The overall goal was to choose tools that are:
 | TypeScript | type system across frontend and backend | improves maintainability, makes API contracts clearer, and reduces ambiguity in the domain model |
 | Ant Design | frontend component library | speeds up delivery of internal-tool UI patterns such as tables, forms, badges, descriptions, notifications, and layout primitives |
 | MobX | client and business state management | provides a lightweight observable state model that is easy to scale for workflow and UI state without heavy Redux-style boilerplate |
+| mobx-persist-store | lightweight persisted UI and auth state | keeps session and shell state stable across refreshes without building a custom persistence layer |
 | React Router | frontend routing | sufficient for a small multi-page application with login, inbox, and lead detail routes |
 | TanStack Query | server-state management | keeps API reads and writes predictable while allowing MobX to stay focused on client and business state |
+| React Hook Form + Zod | form state and validation | keeps forms efficient and type-aware while centralizing field validation rules |
 | NestJS | backend framework | provides a clean controller-service-module structure that is easy to explain and extend |
 | Prisma | ORM and schema management | gives a clear schema definition, typed queries, and a smooth local development workflow |
 | PostgreSQL | relational database | a good fit for structured entities and relationships such as users, leads, and lead activities |
+| Passport JWT + bcryptjs | authentication | provides a straightforward local authentication story for login and protected routes |
 | Swagger | API documentation | helps with local inspection, manual testing, and interview demonstration of backend behavior |
-| npm workspaces | monorepo organization | keeps the repository simple without introducing Turbo, Nx, or additional monorepo orchestration complexity |
+| Docker Compose | local database runtime | makes PostgreSQL bootstrapping consistent for interview review and local development |
+| workspace root scripts | monorepo organization | keeps the repository simple without introducing Turbo, Nx, or additional monorepo orchestration complexity |
 
 ## Frontend decisions and configuration
 
@@ -81,6 +85,7 @@ Configuration approach:
 
 - centralize visual rules through a single theme configuration
 - define typography, color, spacing, and border decisions through tokens
+- wrap repeated UI usage through a small local component layer where helpful
 - use a monochrome base theme with semantic success, error, warning, and info colors
 - rely on Ant Design primitives rather than building custom components too early
 
@@ -99,8 +104,23 @@ Configuration approach:
 
 - keep a root store at the application level
 - separate client and business state from server-fetched state
-- use MobX for UI and workflow state such as filters, selected lead context, and local interaction state
+- use MobX for UI and workflow state such as auth session state, filters, selected lead context, and local interaction state
 - add more focused stores only when the feature set actually requires them
+
+### React Hook Form and Zod
+
+These were chosen because the current app already contains multiple form workflows:
+
+- login
+- create lead
+- activity logging
+- lead edits
+
+Configuration approach:
+
+- React Hook Form manages field registration and submission lifecycle
+- Zod provides schema-based validation with readable error messages
+- resolver integration keeps form validation close to the input contract
 
 ### React Router
 
@@ -110,7 +130,7 @@ Configuration approach:
 
 - browser routing
 - root application shell
-- separate routes for login, lead inbox, and lead detail
+- separate routes for login, dashboard, lead inbox, create lead, and lead detail
 
 ### TanStack Query
 
@@ -139,6 +159,8 @@ Configuration approach:
 - module-based organization
 - controller-service separation
 - global validation pipe
+- global success-response interceptor
+- global exception filter
 - global API prefix
 - CORS configured for the frontend origin
 
@@ -154,6 +176,7 @@ Configuration approach:
 - use migrations for database evolution
 - generate typed client access for backend usage
 - keep persistence logic explicit and close to the backend domain
+- use enum-backed fields for status, source, preferred contact method, and activity type
 
 ### PostgreSQL
 
@@ -170,7 +193,18 @@ Configuration approach:
 
 - local PostgreSQL instance for development
 - environment-based connection string
-- relational model with indexes on likely query paths such as status and timestamps
+- relational model with indexes on likely query paths such as status, assignee, archive flag, and timestamps
+
+### Passport JWT and bcryptjs
+
+These were chosen because the challenge only needs a simple but real authentication layer.
+
+Configuration approach:
+
+- email and password login
+- bcrypt hash comparison in the auth service
+- JWT bearer token returned after login
+- JWT guard protecting `/api/auth/me`, `/api/users`, and `/api/leads` routes
 
 ### Swagger
 
@@ -180,12 +214,24 @@ Configuration approach:
 
 - expose local API documentation through the NestJS Swagger module
 - keep endpoint visibility available during development and review
+- advertise bearer auth in the generated docs
+
+### Docker Compose
+
+Docker Compose is used only for local database infrastructure.
+
+Configuration approach:
+
+- one PostgreSQL service
+- stable port mapping for local development
+- persistent named volume
+- no containerization requirement for the frontend or backend app processes
 
 ## Repository and environment decisions
 
-### npm workspaces
+### Workspace root scripts
 
-npm workspaces were chosen to keep the fullstack project in one repository without adding monorepo framework overhead.
+Root-level workspace scripts were chosen to keep the fullstack project in one repository without adding monorepo framework overhead.
 
 Configuration approach:
 
@@ -202,6 +248,7 @@ Configuration approach:
 
 - use `.env.example` files per app
 - keep database URL, API URL, JWT secret, and web origin configurable
+- keep demo bootstrapping simple through Docker Compose and Prisma seed scripts
 - optimize for local reproducibility rather than complex deployment automation
 
 ## Why these choices fit the challenge

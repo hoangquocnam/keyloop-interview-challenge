@@ -52,11 +52,21 @@ This user needs a simple workflow to avoid losing track of leads and to maintain
 - PostgreSQL persistence through Prisma
 - protected API routes with JWT auth
 
+### Already implemented in the current repository
+
+- create lead page
+- assignee update flow
+- soft archive flow
+- lead inbox pagination, sorting, and source or status filtering
+- seeded demo data beyond a single sample lead
+- Swagger and health endpoint for local review
+
 ### Nice to have later
 
-- simple filtering by status
-- simple search by customer name or email
-- assign lead to salesperson
+- dashboard widgets
+- richer analytics or reporting
+- audit-friendly activity filters
+- refresh token flow or stronger session management
 
 ### Out of scope for the first version
 
@@ -118,30 +128,46 @@ The app should solve three practical problems:
 | Area | Expected responsibility |
 | --- | --- |
 | Auth | login and current-user endpoint |
-| Leads API | list leads, get lead detail, update lead status |
+| Leads API | list leads, get lead detail, create lead, update lead, update status, update assignee, archive |
 | Activities API | create a lead activity |
+| Users API | return assignable sales users for lead ownership |
 | Validation | validate request payloads |
 | Persistence | Prisma models backed by PostgreSQL |
+| API response layer | standardize success and error envelopes |
 | API documentation | expose Swagger for local inspection and demo |
 
-## Initial API outline
+## Current API outline
 
 | Method | Endpoint | Purpose |
 | --- | --- | --- |
-| `POST` | `/auth/login` | authenticate a salesperson |
-| `GET` | `/auth/me` | return the current user |
-| `GET` | `/leads` | return the lead inbox |
-| `GET` | `/leads/:id` | return full lead details and activity history |
-| `PATCH` | `/leads/:id` | update lead status or other editable lead fields |
-| `POST` | `/leads/:id/activities` | create a new follow-up activity |
+| `POST` | `/api/auth/login` | authenticate a salesperson |
+| `GET` | `/api/auth/me` | return the current user |
+| `GET` | `/api/users` | return assignable sales users |
+| `POST` | `/api/leads` | create a new lead from the sales portal |
+| `GET` | `/api/leads` | return the lead inbox |
+| `GET` | `/api/leads/:leadId` | return full lead details and activity history |
+| `PATCH` | `/api/leads/:leadId` | update editable lead fields |
+| `POST` | `/api/leads/:leadId/activities` | create a new follow-up activity |
+| `PATCH` | `/api/leads/:leadId/status` | update lead status |
+| `PATCH` | `/api/leads/:leadId/assignee` | update lead assignee |
+| `PATCH` | `/api/leads/:leadId/archive` | soft archive a lead |
+| `GET` | `/api/health` | basic API health signal |
 
 ## Technical direction
 
 | Layer | Stack |
 | --- | --- |
-| Frontend | React, Vite, TypeScript, Ant Design, React Router, MobX, TanStack Query |
-| Backend | NestJS, Prisma, PostgreSQL |
-| Repo structure | npm workspaces monorepo with `apps/web` and `apps/api` |
+| Frontend | React, Vite, TypeScript, Ant Design, React Router, MobX, TanStack Query, React Hook Form, Zod |
+| Backend | NestJS, Prisma, PostgreSQL, Passport JWT, Swagger |
+| Repo structure | workspace monorepo with `apps/web` and `apps/api` |
+
+## Current implementation notes
+
+- The core working routes today are `/login`, `/leads`, `/leads/new`, and `/leads/:leadId`.
+- A `/dashboard` route exists in the shell, but it is currently a placeholder rather than a completed analytics screen.
+- The backend already has `auth`, `leads`, and `users` modules instead of a single prototype controller.
+- Observability is partially in place through Swagger, a health endpoint, a global success-response interceptor, and a global exception filter.
+- Request ID correlation and structured request tracing are still planned rather than implemented.
 
 ## Delivery principle
 

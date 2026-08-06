@@ -68,6 +68,20 @@ Color should be used as feedback, not decoration.
 | Shadows | soft and subtle |
 | Radius | medium, not overly rounded |
 
+### Current token implementation
+
+The current frontend theme already maps these decisions into shared tokens.
+
+| Token area | Current implementation |
+| --- | --- |
+| Primary font | `IBM Plex Sans` |
+| Monospace font | `IBM Plex Mono` |
+| Font sizes | `12`, `13`, `14`, `16`, `20`, `28`, `40` |
+| Font weights | `400`, `500`, `600`, `700` |
+| Base radius scale | `6`, `8`, `12`, `16` |
+| Base spacing scale | `4`, `8`, `12`, `16`, `24`, `32`, `40` |
+| Base semantic colors | success green, error red, warning amber, info blue |
+
 ## Typography
 
 | Element | Direction |
@@ -80,6 +94,16 @@ Color should be used as feedback, not decoration.
 Typography should carry the hierarchy more than color.
 
 ## Core pages to prioritize
+
+### Shell layout
+
+The implemented shell already follows a simple internal-tool layout:
+
+- left sidebar for primary navigation
+- topbar for global search and create-lead action
+- protected content area for page-level workflows
+
+This layout should remain stable as the product grows.
 
 ### 1. Login page
 
@@ -96,6 +120,12 @@ Expected behavior:
 - optional helper text for local demo credentials
 
 The login page should feel minimal and frictionless.
+
+Current implementation note:
+
+- centered card layout
+- inline credential error state
+- seeded demo account hint shown on the page
 
 ### 2. Lead inbox page
 
@@ -142,6 +172,27 @@ Expected behavior:
 
 This page should function like a focused work area rather than a generic detail screen.
 
+Current implementation note:
+
+- timeline, status update, assignee update, and archive actions are already part of the page scope
+
+### 4. Create lead page
+
+Purpose:
+
+- allow the salesperson to add a new lead directly from the portal
+
+Expected behavior:
+
+- form-first layout
+- clear contact information section
+- preferred contact method controls
+- optional assignee selection
+- confirmation and error feedback after submission
+- easy return path to the inbox
+
+This page should feel consistent with the detail workspace rather than like a separate product area.
+
 ## Key interaction areas
 
 ### Activity timeline
@@ -163,8 +214,11 @@ Suggested fields:
 
 - activity type
 - note
-- happened-at date and time
 - submit action
+
+Current implementation note:
+
+- for the current MVP, the backend generates the activity timestamp on submit
 
 The interaction should support:
 
@@ -226,6 +280,11 @@ The first version should avoid:
 - decorative charts
 - too many accent colors
 - overly animated interactions
+
+## Implementation status note
+
+- `/dashboard` exists in the shell but is intentionally a placeholder
+- the strongest implementation effort currently sits in `/login`, `/leads`, `/leads/new`, and `/leads/:leadId`
 
 ## Summary
 

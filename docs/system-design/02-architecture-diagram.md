@@ -8,12 +8,16 @@ flowchart LR
 
     subgraph Client["Client Layer"]
         Web["Web App\nReact + Vite + TypeScript"]
+        ClientState["MobX + Route Guards\nSession and UI state"]
+        ServerState["TanStack Query + Services\nAPI requests and cache"]
     end
 
     subgraph Server["Application Layer"]
         API["API Server\nNestJS"]
-        Auth["Auth + Validation\nJWT, Guards, DTO validation"]
-        LeadDomain["Lead Management\nLead inbox, detail, status updates,\nactivity logging"]
+        Auth["Auth Module\nJWT login and current-user"]
+        Leads["Leads Module\nInbox, detail, create, activity,\nstatus, assignee, archive"]
+        Users["Users Module\nAssignable sales users"]
+        Common["Global Validation + Response Layer\nValidationPipe, exception filter,\nsuccess interceptor"]
         Docs["Swagger + Health Check"]
     end
 
@@ -23,9 +27,13 @@ flowchart LR
     end
 
     Salesperson -->|"Uses via browser"| Web
-    Web -->|"HTTPS / REST API\nJWT on protected routes"| API
-    API -->|"Authenticates and validates requests"| Auth
-    API -->|"Executes lead and activity workflows"| LeadDomain
+    Web --> ClientState
+    Web --> ServerState
+    ServerState -->|"HTTP / REST API\nBearer token on protected routes"| API
+    API -->|"Authenticates current session"| Auth
+    API -->|"Executes lead workflows"| Leads
+    API -->|"Loads assignable users"| Users
+    API -->|"Validates and shapes responses"| Common
     API -->|"Exposes local API docs and service visibility"| Docs
     API -->|"Queries and mutations"| Prisma
     Prisma -->|"Read / write persistent data"| DB
@@ -37,9 +45,10 @@ The architecture is intentionally simple and centered around a single user-facin
 
 - The salesperson uses the web application in the browser.
 - The web application is the only client and communicates with the backend over HTTP.
-- The NestJS API owns authentication, request validation, and the lead/activity business workflow.
+- The NestJS API owns authentication, request validation, response shaping, and the lead workflow.
 - Prisma acts as the API's data access layer.
 - PostgreSQL is the system of record for users, leads, and follow-up activities.
+- The frontend separates client and workflow state from server-state fetching.
 
 ## Reading guide
 
@@ -48,6 +57,8 @@ The architecture is intentionally simple and centered around a single user-facin
 3. The `Data Layer` contains the ORM and relational database used for persistence.
 4. The main runtime path is:
    `Salesperson -> Web App -> API Server -> Prisma -> PostgreSQL`
+5. The main frontend control path is:
+   `Web App -> MobX / Route Guards -> Query Hooks / Services -> API`
 
 ## Why this level of detail is appropriate
 

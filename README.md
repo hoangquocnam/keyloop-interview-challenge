@@ -17,9 +17,21 @@ Interview challenge monorepo for a lightweight sales lead management tool.
 
 ## Stack
 
-- Frontend: React, Vite, TypeScript, Ant Design, React Router, MobX, TanStack Query
-- Backend: NestJS, Prisma, PostgreSQL
-- Package management: npm workspaces
+- Frontend: React, Vite, TypeScript, Ant Design, React Router, MobX, TanStack Query, React Hook Form, Zod
+- Backend: NestJS, Prisma, PostgreSQL, Passport JWT, Swagger
+- Local infrastructure: Docker Compose + PostgreSQL 15
+- Monorepo: workspace-based repo with root-level scripts
+
+## Current implementation snapshot
+
+- Auth: `/login`, JWT sign-in, session restore via `/api/auth/me`
+- App shell: protected layout with sidebar, topbar search, and route guards
+- Lead inbox: search, status/source filters, sorting, pagination, row selection
+- Lead detail: contact summary, inquiry block, timeline, status update, assignee update, activity logging, archive
+- Lead creation: `/leads/new` form with validation and assignment support
+- Supporting backend surfaces: Swagger, `/api/health`, standardized success and error envelopes
+- Demo data: seeded salesperson accounts plus a larger lead dataset for inbox browsing
+- Demo credentials: `admin@leadstream.com` / `Password123!`
 
 ## Project structure
 
@@ -67,7 +79,8 @@ README.md
 
    ```bash
    npm run prisma:generate
-   npm run prisma:migrate:dev -- --name init
+   npm run prisma:migrate:dev
+   cd apps/api && npm run prisma:seed
    ```
 
 5. Start both apps:
@@ -87,9 +100,11 @@ README.md
 - `npm run db:down` stops the Docker PostgreSQL service
 - `npm run db:logs` tails the PostgreSQL container logs
 - `npm run prisma:studio` opens Prisma Studio
+- `cd apps/api && npm run prisma:seed` seeds demo users and leads
 
 ## Default local URLs
 
 - Web: `http://localhost:5173`
 - API: `http://localhost:3000/api`
 - Swagger: `http://localhost:3000/docs`
+- Health: `http://localhost:3000/api/health`

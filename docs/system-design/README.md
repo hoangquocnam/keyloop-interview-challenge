@@ -2,6 +2,11 @@
 
 This folder contains the system design documentation for Part 1 of the challenge.
 
+The documents below were updated to match the current source code in this repository and distinguish between:
+
+- what is already implemented
+- what remains a planned next increment
+
 ## Sections
 
 - [01. Overview](./01-overview.md)

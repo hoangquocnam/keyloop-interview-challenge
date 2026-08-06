@@ -33,9 +33,19 @@ The application is designed as a simple web client and API server backed by Post
 
 | Layer | Responsibility |
 | --- | --- |
-| `apps/web` | user interface, routing, data fetching, interaction handling |
-| `apps/api` | authentication, business logic, validation, persistence orchestration |
+| `apps/web` | user interface, routing, MobX client state, TanStack Query data fetching, interaction handling |
+| `apps/api` | authentication, lead workflows, users API, validation, response shaping, persistence orchestration |
 | PostgreSQL | durable storage for users, leads, and follow-up activities |
+
+## Current implementation snapshot
+
+As of the current repository state:
+
+- the frontend has working routes for login, lead inbox, create lead, and lead detail
+- the app shell already includes route guards, sidebar navigation, and topbar search
+- the backend already exposes `auth`, `leads`, `users`, Swagger, and `health`
+- the dashboard route exists but is still a placeholder
+- request ID tracing and structured request logging are still planned, not yet implemented
 
 ## Design priorities
 
