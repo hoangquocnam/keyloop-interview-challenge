@@ -83,6 +83,8 @@ README.md
    cd apps/api && npm run prisma:seed
    ```
 
+   This step creates the database schema and inserts the demo users and leads required for the walkthrough.
+
 5. Start both apps:
 
    ```bash
@@ -108,3 +110,41 @@ README.md
 - API: `http://localhost:3000/api`
 - Swagger: `http://localhost:3000/docs`
 - Health: `http://localhost:3000/api/health`
+
+## Demo account
+
+- Email: `admin@leadstream.com`
+- Password: `Password123!`
+
+## Seed demo data and verify login
+
+If you want to make sure the demo data exists before reviewing the app, run the following commands from the repository root:
+
+```bash
+npm install
+cp apps/api/.env.example apps/api/.env
+cp apps/web/.env.example apps/web/.env
+npm run db:up
+npm run prisma:generate
+npm run prisma:migrate:dev
+cd apps/api && npm run prisma:seed
+```
+
+Then start the application:
+
+```bash
+npm run dev
+```
+
+After that, open `http://localhost:5173/login` and sign in with:
+
+- Email: `admin@leadstream.com`
+- Password: `Password123!`
+
+If the database already exists but you want to refresh the demo data, you can re-run:
+
+```bash
+cd apps/api && npm run prisma:seed
+```
+
+The seed script upserts the demo users and recreates the demo leads so the interviewer can log in and review the main workflows immediately.
