@@ -48,10 +48,8 @@ export const LoginPage = observer(() => {
       setCredentialErrorMessage(null);
       await auth.login(values);
       void navigate(appRoutes.leads);
-    } catch (error) {
-      setCredentialErrorMessage(
-        error instanceof Error ? error.message : "Unable to sign in.",
-      );
+    } catch {
+      setCredentialErrorMessage("Invalid email or password");
     }
   });
 
